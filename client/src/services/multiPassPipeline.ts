@@ -1,0 +1,246 @@
+/************************************************************************
+ *    Copyright (C) 2025 Code Forge Temple                              *
+ *    This file is part of agentic-signal project                       *
+ *    See the LICENSE file in the project root for license details.     *
+ ************************************************************************/
+
+import {MessageRole} from "../types/ollama.types";
+import {OllamaService} from "./ollamaService";
+import {getCookbook, ModelCookbook} from "./promptCookbook";
+
+export type PipelineStage =
+    | "classifier"
+    | "extractor"
+    | "generator"
+    | "validator";
+
+export interface PipelineConfig {
+    enabled: boolean;
+    stages: PipelineStage[];
+    input: any;
+    prompt: string;
+    model: string;
+}
+
+export interface StageResult {
+    stage: PipelineStage;
+    output: string;
+    passed: boolean;
+    durationMs: number;
+}
+
+async function runClassifier (
+    input: string,
+    cookbook: ModelCookbook,
+    model: string
+): Promise<string> {
+    const systemMsg = cookbook.systemWrapper(
+        "Your job is to classify the input into EXACTLY ONE category. Output only the category name, nothing else."
+    );
+    const userMsg = cookbook.userWrapper(
+        `Input:\n${input.slice(0, 2000)}\n\nClassify as one of: [data_extraction, summarization, analysis, transformation, other]`
+    );
+    const result = await OllamaService.getInstance().fetchAIResponse({
+        messages: [
+            {role: MessageRole.SYSTEM, content: systemMsg},
+            {role: MessageRole.USER, content: userMsg},
+        ],
+        model,
+        maxToolRetries: 1,
+    });
+
+    return result.success ? result.reply.trim().toLowerCase() : "other";
+}
+
+async function runExtractor (
+    input: string,
+    taskType: string,
+    cookbook: ModelCookbook,
+    model: string
+): Promise<any> {
+    const schemaPrompt =
+        taskType.includes("extract") || taskType.includes("data")
+            ? "Extract all structured data fields as a JSON object. Include ONLY fields that exist in the input."
+            : "Extract the key entities, numbers, and facts from the input as JSON.";
+    const systemMsg = cookbook.systemWrapper(schemaPrompt);
+    const userMsg = cookbook.userWrapper(
+        `Input:\n${input.slice(0, 2000)}\n${cookbook.jsonEnforcementSuffix}`
+    );
+    const result = await OllamaService.getInstance().fetchAIResponse({
+        messages: [
+            {role: MessageRole.SYSTEM, content: systemMsg},
+            {role: MessageRole.USER, content: userMsg},
+        ],
+        model,
+        format: {type: "object"} as any,
+        maxToolRetries: 1,
+    });
+
+    if (result.success) {
+        try {
+            return JSON.parse(result.reply);
+        } catch {
+            return {extracted: result.reply};
+        }
+    }
+
+    return {error: "extraction_failed"};
+}
+
+async function runGenerator (
+    extracted: any,
+    originalPrompt: string,
+    cookbook: ModelCookbook,
+    model: string
+): Promise<string> {
+    const systemMsg = cookbook.systemWrapper(originalPrompt);
+    const userMsg = cookbook.userWrapper(
+        `Extracted data:\n${JSON.stringify(extracted, null, 2)}\n\n${cookbook.antiHallucinationWrapper}\n${cookbook.jsonEnforcementSuffix}`
+    );
+    const result = await OllamaService.getInstance().fetchAIResponse({
+        messages: [
+            {role: MessageRole.SYSTEM, content: systemMsg},
+            {role: MessageRole.USER, content: userMsg},
+        ],
+        model,
+        maxToolRetries: 1,
+    });
+
+    return result.success ? result.reply : "generation_failed";
+}
+
+async function runValidator (
+    output: string,
+    extracted: any,
+    cookbook: ModelCookbook,
+    model: string
+): Promise<{ passed: boolean; reason: string }> {
+    const systemMsg = cookbook.systemWrapper(
+        "You are a validator. Check if the output is factually consistent with the source data. Output ONLY 'PASS' or 'FAIL: <reason>'."
+    );
+    const userMsg = cookbook.userWrapper(
+        `Source data:\n${JSON.stringify(extracted, null, 2)}\n\nOutput to validate:\n${output}\n\nIs the output consistent with the source data?`
+    );
+    const result = await OllamaService.getInstance().fetchAIResponse({
+        messages: [
+            {role: MessageRole.SYSTEM, content: systemMsg},
+            {role: MessageRole.USER, content: userMsg},
+        ],
+        model,
+        maxToolRetries: 1,
+    });
+
+    if (result.success) {
+        return {
+            passed: !result.reply.toUpperCase().startsWith("FAIL"),
+            reason: result.reply,
+        };
+    }
+
+    return {passed: false, reason: "validator_call_failed"};
+}
+
+function deterministicFormatOutput (extracted: any): string {
+    return JSON.stringify(
+        {
+            analysis: "Automated extraction from input data",
+            extracted_data: extracted,
+            confidence: "low",
+            note: "This output was generated by the fallback extraction layer — not the LLM directly.",
+        },
+        null,
+        2
+    );
+}
+
+export async function runMultiPassPipeline (
+    config: PipelineConfig
+): Promise<{
+    finalOutput: string;
+    stages: StageResult[];
+    totalDurationMs: number;
+}> {
+    const startTime = performance.now();
+    const stages: StageResult[] = [];
+    const cookbook = getCookbook(config.model);
+    const input =
+        typeof config.input === "string"
+            ? config.input
+            : JSON.stringify(config.input || "");
+
+    let taskType = "other";
+    let extracted: any = {};
+    let generatedOutput = "";
+
+    if (config.stages.includes("classifier")) {
+        const t0 = performance.now();
+
+        taskType = await runClassifier(input, cookbook, config.model);
+        stages.push({
+            stage: "classifier",
+            output: taskType,
+            passed: true,
+            durationMs: performance.now() - t0,
+        });
+    }
+
+    if (config.stages.includes("extractor")) {
+        const t0 = performance.now();
+
+        extracted = await runExtractor(input, taskType, cookbook, config.model);
+        stages.push({
+            stage: "extractor",
+            output: JSON.stringify(extracted).slice(0, 200),
+            passed: !extracted.error,
+            durationMs: performance.now() - t0,
+        });
+    }
+
+    if (config.stages.includes("generator")) {
+        const t0 = performance.now();
+
+        generatedOutput = await runGenerator(
+            extracted,
+            config.prompt,
+            cookbook,
+            config.model
+        );
+        stages.push({
+            stage: "generator",
+            output: generatedOutput.slice(0, 200),
+            passed: !generatedOutput.startsWith("generation_failed"),
+            durationMs: performance.now() - t0,
+        });
+    }
+
+    if (config.stages.includes("validator")) {
+        const t0 = performance.now();
+        const validation = await runValidator(
+            generatedOutput || "",
+            extracted,
+            cookbook,
+            config.model
+        );
+
+        stages.push({
+            stage: "validator",
+            output: validation.reason,
+            passed: validation.passed,
+            durationMs: performance.now() - t0,
+        });
+
+        if (
+            !validation.passed &&
+            config.stages.includes("generator")
+        ) {
+            generatedOutput = deterministicFormatOutput(extracted);
+        }
+    }
+
+    return {
+        finalOutput:
+            generatedOutput || deterministicFormatOutput(extracted),
+        stages,
+        totalDurationMs: performance.now() - startTime,
+    };
+}

@@ -1,0 +1,92 @@
+{
+    "nodes": [
+        {
+            "id": "cr001aa-bb11-4a00-9aaa-bbb111222333",
+            "type": "data-source",
+            "position": {
+                "x": 70,
+                "y": 90
+            },
+            "data": {
+                "title": "Data Source",
+                "dataSource": {
+                    "value": {
+                        "text": "Review the attached TypeScript code for bugs, security issues, and performance problems. Provide a detailed code review with fixes.",
+                        "files": [
+                            {
+                                "name": "UserService.ts",
+                                "content": "```typescript\nexport class UserService {\n  async createUser(email: string, password: string) {\n    const query = `INSERT INTO users (email, password) VALUES ('${email}', '${password}')`;\n    await this.db.execute(query);\n    sendEmail(email, 'Welcome!', 'Account created.');\n    return true;\n  }\n\n  async getUser(id: number) {\n    const users = await this.db.query(`SELECT * FROM users WHERE id = ${id}`);\n    return users[0];\n  }\n\n  async deleteUser(id: number) {\n    await this.db.execute(`DELETE FROM users WHERE id = ${id}`);\n    return { success: true };\n  }\n\n  async searchUsers(term: string) {\n    return this.db.query(`SELECT * FROM users WHERE email LIKE '%${term}%'`);\n  }\n}\n```"
+                            }
+                        ]
+                    },
+                    "type": "markdown"
+                }
+            },
+            "measured": {
+                "width": 160,
+                "height": 40
+            },
+            "selected": false,
+            "dragging": false
+        },
+        {
+            "id": "cr002bc-cc22-4b11-1bbb-ccc222333444",
+            "type": "llm-process",
+            "position": {
+                "x": 310,
+                "y": 90
+            },
+            "data": {
+                "title": "AI Code Reviewer",
+                "model": "",
+                "prompt": "You are a senior code reviewer. Analyze the provided TypeScript code for issues:\n\n1. Security vulnerabilities (SQL injection, data exposure)\n2. Bugs and edge cases (null returns, missing validation)\n3. Performance issues\n4. Code quality (error handling, types)\n5. Best practices violations\n\nFormat your review as clean Markdown with sections:\n\n# Code Review: UserService.ts\n\n## Severity Summary\n| Critical | High | Medium | Low |\n|----------|------|--------|-----|\n| count | count | count | count |\n\n## Critical Issues\n### [Title]\n- **Category:** [Security/Bug/Performance]\n- **Problem:** [explain the issue]\n- **Fix:** [provide corrected code]\n\n## Score: [1-10 with justification]\n\nOutput ONLY the review in Markdown. No preambles, no extra text.",
+                "message": {},
+                "format": {},
+                "maxFeedbackLoops": 0
+            },
+            "measured": {
+                "width": 160,
+                "height": 40
+            },
+            "selected": false,
+            "dragging": false
+        },
+        {
+            "id": "cr003cd-dd33-4c22-2ccc-ddd333444555",
+            "type": "data-flow-spy",
+            "position": {
+                "x": 560,
+                "y": 90
+            },
+            "data": {
+                "title": "Review Output"
+            },
+            "measured": {
+                "width": 120,
+                "height": 40
+            },
+            "selected": false,
+            "dragging": false
+        }
+    ],
+    "edges": [
+        {
+            "type": "smoothstep",
+            "animated": false,
+            "source": "cr001aa-bb11-4a00-9aaa-bbb111222333",
+            "sourceHandle": "right-source",
+            "target": "cr002bc-cc22-4b11-1bbb-ccc222333444",
+            "targetHandle": "left-target",
+            "id": "edge-cr-001"
+        },
+        {
+            "type": "smoothstep",
+            "animated": false,
+            "source": "cr002bc-cc22-4b11-1bbb-ccc222333444",
+            "sourceHandle": "right-source",
+            "target": "cr003cd-dd33-4c22-2ccc-ddd333444555",
+            "targetHandle": "left-target",
+            "id": "edge-cr-002"
+        }
+    ]
+}

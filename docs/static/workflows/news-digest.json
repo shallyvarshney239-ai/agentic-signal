@@ -1,0 +1,164 @@
+{
+    "nodes": [
+        {
+            "id": "a1b2c3d4-e5f6-4a1b-8c9d-0e1f2a3b4c5d",
+            "type": "timer",
+            "position": {
+                "x": 60,
+                "y": 90
+            },
+            "data": {
+                "title": "Timer",
+                "mode": "interval",
+                "interval": 0,
+                "immediate": false,
+                "runOnce": true,
+                "repeat": "once"
+            },
+            "measured": {
+                "width": 160,
+                "height": 40
+            },
+            "selected": false,
+            "dragging": false
+        },
+        {
+            "id": "b2c3d4e5-f6a1-4b2c-9d0e-1f2a3b4c5d6e",
+            "type": "data-source",
+            "position": {
+                "x": 280,
+                "y": 90
+            },
+            "data": {
+                "title": "Data Source",
+                "dataSource": {
+                    "value": {
+                        "text": "Find the top 5 AI technology news headlines from today and summarize them. Include the source links.",
+                        "files": []
+                    },
+                    "type": "markdown"
+                }
+            },
+            "measured": {
+                "width": 160,
+                "height": 40
+            },
+            "selected": false,
+            "dragging": false
+        },
+        {
+            "id": "c3d4e5f6-a1b2-4c3d-0e1f-2a3b4c5d6e7f",
+            "type": "ai-tool",
+            "position": {
+                "x": 520,
+                "y": 200
+            },
+            "data": {
+                "title": "DuckDuckGo Search Tool",
+                "toolSubtype": "duckduckgo-search",
+                "userConfig": {
+                    "maxResults": 5,
+                    "requireToolUse": true
+                },
+                "userConfigSchema": {
+                    "maxResults": {
+                        "type": "integer",
+                        "description": "Maximum number of results to return",
+                        "default": 5,
+                        "minimum": 1,
+                        "maximum": 20
+                    },
+                    "requireToolUse": {
+                        "type": "boolean",
+                        "description": "Require tool use (forces the LLM to always call this tool)",
+                        "default": true
+                    }
+                }
+            },
+            "measured": {
+                "width": 120,
+                "height": 40
+            },
+            "selected": false,
+            "dragging": false
+        },
+        {
+            "id": "d4e5f6a1-b2c3-4d4e-1f2a-3b4c5d6e7f8a",
+            "type": "llm-process",
+            "position": {
+                "x": 500,
+                "y": 90
+            },
+            "data": {
+                "title": "AI Data Processing",
+                "model": "",
+                "prompt": "You are a news digest AI.\n\nYou have access to the \"duckDuckGoSearch\" tool.\n\nProcess:\n1. Call the \"duckDuckGoSearch\" tool to search for \"latest AI technology news today\"\n2. From the results, extract up to 5 distinct news stories\n3. For each story provide: headline, 2-sentence summary, and source URL\n\nOutput format - valid JSON only:\n{\n  \"digest\": [\n    {\"headline\": \"...\", \"summary\": \"...\", \"source\": \"url\"}\n  ],\n  \"generatedAt\": \"current date time\"\n}\n\nDo NOT include any explanations, preambles, or markdown outside the JSON object.",
+                "message": {},
+                "format": {},
+                "maxFeedbackLoops": 0,
+                "maxToolRetries": 3
+            },
+            "measured": {
+                "width": 160,
+                "height": 40
+            },
+            "selected": false,
+            "dragging": false
+        },
+        {
+            "id": "e5f6a1b2-c3d4-4e5f-2a3b-4c5d6e7f8a9b",
+            "type": "data-flow-spy",
+            "position": {
+                "x": 740,
+                "y": 90
+            },
+            "data": {
+                "title": "Data Flow Spy"
+            },
+            "measured": {
+                "width": 120,
+                "height": 40
+            },
+            "selected": false,
+            "dragging": false
+        }
+    ],
+    "edges": [
+        {
+            "type": "smoothstep",
+            "animated": false,
+            "source": "a1b2c3d4-e5f6-4a1b-8c9d-0e1f2a3b4c5d",
+            "sourceHandle": "timer-trigger",
+            "target": "b2c3d4e5-f6a1-4b2c-9d0e-1f2a3b4c5d6e",
+            "targetHandle": "timer-trigger",
+            "id": "edge-timer-datasource-news"
+        },
+        {
+            "type": "smoothstep",
+            "animated": false,
+            "source": "b2c3d4e5-f6a1-4b2c-9d0e-1f2a3b4c5d6e",
+            "sourceHandle": "right-source",
+            "target": "d4e5f6a1-b2c3-4d4e-1f2a-3b4c5d6e7f8a",
+            "targetHandle": "left-target",
+            "id": "edge-datasource-llm-news"
+        },
+        {
+            "type": "smoothstep",
+            "animated": false,
+            "source": "c3d4e5f6-a1b2-4c3d-0e1f-2a3b4c5d6e7f",
+            "sourceHandle": "right-source",
+            "target": "d4e5f6a1-b2c3-4d4e-1f2a-3b4c5d6e7f8a",
+            "targetHandle": "tools-target",
+            "id": "edge-tool-llm-news"
+        },
+        {
+            "type": "smoothstep",
+            "animated": false,
+            "source": "d4e5f6a1-b2c3-4d4e-1f2a-3b4c5d6e7f8a",
+            "sourceHandle": "right-source",
+            "target": "e5f6a1b2-c3d4-4e5f-2a3b-4c5d6e7f8a9b",
+            "targetHandle": "left-target",
+            "id": "edge-llm-spy-news"
+        }
+    ]
+}

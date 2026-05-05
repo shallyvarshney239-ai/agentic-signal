@@ -1,0 +1,117 @@
+{
+    "nodes": [
+        {
+            "id": "aabb11cc-dd22-4aa1-88ff-112233445566",
+            "type": "data-source",
+            "position": {
+                "x": 70,
+                "y": 90
+            },
+            "data": {
+                "title": "Data Source",
+                "dataSource": {
+                    "value": {
+                        "text": "Project Alpha - Sprint Planning Meeting Notes\nAttendees: Alice (PM), Bob (Lead Dev), Clara (Designer), Dev (QA)\n\nPoints discussed:\n- Current sprint velocity is 32 points, down from 38 last sprint. Bob mentioned team was blocked by API changes from the backend team.\n- Clara proposed new onboarding flow design. Everyone agreed it's much cleaner. Bob estimated 8 story points for implementation.\n- Dev raised concern about increasing bug count in the payment module - 15 new bugs this sprint.\n- Alice announced client demo is moved to May 15th. Need to have payment fixes ready by May 12th.\n- Team agreed to allocate 20% of next sprint to tech debt - Bob will lead the effort.\n- New hire starts Monday - Clara to prepare onboarding docs.\n\nAction Items:\n- Bob: Fix payment API integration by May 10th\n- Clara: Prepare onboarding design docs by Monday\n- Dev: Prioritize payment bugs, create test plan\n- Alice: Confirm client demo time and send calendar invite",
+                        "files": []
+                    },
+                    "type": "markdown"
+                }
+            },
+            "measured": {
+                "width": 160,
+                "height": 40
+            },
+            "selected": false,
+            "dragging": false
+        },
+        {
+            "id": "bbcc22dd-ee33-4bb2-99aa-334455667788",
+            "type": "llm-process",
+            "position": {
+                "x": 310,
+                "y": 90
+            },
+            "data": {
+                "title": "AI Data Processing",
+                "model": "",
+                "prompt": "You are a meeting notes summarizer. Process the input and produce a structured summary.\n\nOutput ONLY a valid JSON object:\n{\n  \"meetingTitle\": \"extracted or inferred title\",\n  \"date\": \"extracted or current date\",\n  \"attendees\": [\"name1\", \"name2\"],\n  \"keyDecisions\": [\"decision 1\", \"decision 2\"],\n  \"actionItems\": [\n    {\"assignee\": \"name\", \"task\": \"description\", \"deadline\": \"date or ASAP\"}\n  ],\n  \"risksAndConcerns\": [\"concern 1\"],\n  \"nextSteps\": [\"step 1\"]\n}\n\nDo NOT include any explanations or markdown outside the JSON.",
+                "message": {},
+                "format": {
+                    "onSuccess": "{\n  \"type\": \"object\",\n  \"required\": [\"meetingTitle\", \"attendees\", \"keyDecisions\", \"actionItems\"],\n  \"properties\": {\n    \"meetingTitle\": {\"type\": \"string\"},\n    \"date\": {\"type\": \"string\"},\n    \"attendees\": {\"type\": \"array\", \"items\": {\"type\": \"string\"}},\n    \"keyDecisions\": {\"type\": \"array\", \"items\": {\"type\": \"string\"}},\n    \"actionItems\": {\n      \"type\": \"array\",\n      \"items\": {\n        \"type\": \"object\",\n        \"required\": [\"assignee\", \"task\"],\n        \"properties\": {\n          \"assignee\": {\"type\": \"string\"},\n          \"task\": {\"type\": \"string\"},\n          \"deadline\": {\"type\": \"string\"}\n        }\n      }\n    },\n    \"risksAndConcerns\": {\"type\": \"array\", \"items\": {\"type\": \"string\"}},\n    \"nextSteps\": {\"type\": \"array\", \"items\": {\"type\": \"string\"}}\n  }\n}",
+                    "onError": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"error\": {\"type\": \"string\"}\n  },\n  \"required\": [\"error\"]\n}"
+                },
+                "maxFeedbackLoops": 1
+            },
+            "measured": {
+                "width": 160,
+                "height": 40
+            },
+            "selected": false,
+            "dragging": false
+        },
+        {
+            "id": "ccdd33ee-ff44-4cc3-aabb-556677889900",
+            "type": "data-validation",
+            "position": {
+                "x": 540,
+                "y": 90
+            },
+            "data": {
+                "title": "Data Validation",
+                "schema": "{\n  \"type\": \"object\",\n  \"required\": [\"meetingTitle\", \"attendees\", \"keyDecisions\", \"actionItems\"],\n  \"properties\": {\n    \"meetingTitle\": {\"type\": \"string\"},\n    \"date\": {\"type\": \"string\"},\n    \"attendees\": {\"type\": \"array\", \"items\": {\"type\": \"string\"}},\n    \"keyDecisions\": {\"type\": \"array\", \"items\": {\"type\": \"string\"}},\n    \"actionItems\": {\n      \"type\": \"array\",\n      \"items\": {\n        \"type\": \"object\",\n        \"required\": [\"assignee\", \"task\"],\n        \"properties\": {\n          \"assignee\": {\"type\": \"string\"},\n          \"task\": {\"type\": \"string\"},\n          \"deadline\": {\"type\": \"string\"}\n        }\n      }\n    },\n    \"risksAndConcerns\": {\"type\": \"array\", \"items\": {\"type\": \"string\"}},\n    \"nextSteps\": {\"type\": \"array\", \"items\": {\"type\": \"string\"}}\n  }\n}"
+            },
+            "measured": {
+                "width": 120,
+                "height": 40
+            },
+            "selected": false,
+            "dragging": false
+        },
+        {
+            "id": "ddee44ff-aa55-4dd4-bbcc-778899001122",
+            "type": "data-flow-spy",
+            "position": {
+                "x": 740,
+                "y": 90
+            },
+            "data": {
+                "title": "Data Flow Spy"
+            },
+            "measured": {
+                "width": 120,
+                "height": 40
+            },
+            "selected": false,
+            "dragging": false
+        }
+    ],
+    "edges": [
+        {
+            "type": "smoothstep",
+            "animated": false,
+            "source": "aabb11cc-dd22-4aa1-88ff-112233445566",
+            "sourceHandle": "right-source",
+            "target": "bbcc22dd-ee33-4bb2-99aa-334455667788",
+            "targetHandle": "left-target",
+            "id": "edge-datasource-llm-meeting"
+        },
+        {
+            "type": "smoothstep",
+            "animated": false,
+            "source": "bbcc22dd-ee33-4bb2-99aa-334455667788",
+            "sourceHandle": "right-source",
+            "target": "ccdd33ee-ff44-4cc3-aabb-556677889900",
+            "targetHandle": "left-target",
+            "id": "edge-llm-validation-meeting"
+        },
+        {
+            "type": "smoothstep",
+            "animated": false,
+            "source": "ccdd33ee-ff44-4cc3-aabb-556677889900",
+            "sourceHandle": "right-source",
+            "target": "ddee44ff-aa55-4dd4-bbcc-778899001122",
+            "targetHandle": "left-target",
+            "id": "edge-validation-spy-meeting"
+        }
+    ]
+}

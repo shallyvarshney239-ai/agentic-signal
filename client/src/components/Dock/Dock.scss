@@ -1,0 +1,130 @@
+/* =====================================================
+   DOCK SHARED MIXIN — Dark Theme
+   ===================================================== */
+
+@mixin dock-wrapper {
+    z-index: 100;
+    background: var(--bg-secondary);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    border: 1px solid var(--border-subtle);
+    padding: 8px 10px;
+    backdrop-filter: blur(10px);
+}
+
+/* =====================================================
+   DOCK ITEM — Dark Theme
+   ===================================================== */
+.dock {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translate(-50%);
+    z-index: 100;
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 8px;
+
+    .dock-items {
+        display: flex;
+        flex-direction: row;
+        gap: 4px;
+        align-items: flex-start;
+    }
+
+    .dock-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 5px;
+        border-radius: var(--radius-md);
+        padding: 7px 5px 6px;
+        background: transparent;
+        border: 1px solid transparent;
+        cursor: grab;
+        transition: background var(--transition-fast), border-color var(--transition-fast), transform var(--transition-fast);
+        position: relative;
+        min-width: 52px;
+        max-width: 62px;
+        user-select: none;
+
+        &:hover {
+            background: var(--bg-tertiary);
+            border-color: var(--border-subtle);
+            transform: translateY(-2px);
+
+            .dock-item-icon-wrapper {
+                background: var(--item-color, var(--accent-primary));
+                transform: scale(1.05);
+                box-shadow: 0 3px 10px color-mix(in srgb, var(--item-color, var(--accent-primary)) 40%, transparent);
+            }
+
+            .dock-item-label {
+                color: var(--text-primary);
+            }
+        }
+
+        &:active {
+            cursor: grabbing;
+            transform: translateY(0px) scale(0.96);
+        }
+
+        &.dragging {
+            opacity: 0.45;
+            cursor: grabbing;
+            transform: scale(0.94);
+        }
+
+        .dock-item-icon-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            border-radius: var(--radius-md);
+            background: color-mix(in srgb, var(--item-color, var(--accent-primary)) 15%, var(--bg-tertiary));
+            flex-shrink: 0;
+            transition: background var(--transition-fast), transform var(--transition-fast), box-shadow var(--transition-fast);
+            border: 1px solid color-mix(in srgb, var(--item-color, var(--accent-primary)) 20%, var(--border-subtle));
+
+            svg, .dock-item-icon {
+                width: 18px !important;
+                height: 18px !important;
+                color: var(--item-color, var(--accent-primary)) !important;
+                fill: none !important;
+                stroke: currentColor !important;
+                stroke-width: 1.5 !important;
+            }
+        }
+
+        .dock-item-icon-wrapper:hover svg,
+        .dock-item-icon-wrapper:hover .dock-item-icon {
+            color: #fff !important;
+        }
+
+        .dock-item-label {
+            font-size: 9.5px;
+            font-weight: 600;
+            color: var(--text-muted);
+            font-family: 'Inter', system-ui, sans-serif;
+            text-align: center;
+            line-height: 1.2;
+            letter-spacing: 0.01em;
+            width: 100%;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            transition: color var(--transition-fast);
+        }
+
+        .dock-item-shortcut {
+            font-size: 8px;
+            font-weight: 600;
+            color: var(--text-muted);
+            line-height: 1;
+            letter-spacing: 0.03em;
+            text-transform: uppercase;
+        }
+    }
+}

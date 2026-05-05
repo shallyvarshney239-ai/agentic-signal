@@ -1,0 +1,185 @@
+.right-sidebar {
+    width: var(--right-sidebar-width);
+    background: var(--bg-secondary);
+    border-left: 1px solid var(--border-subtle);
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    flex-shrink: 0;
+    z-index: 100;
+
+    // ── Section ────────────────────────────────────
+    .rs-section {
+        padding: var(--space-4);
+        border-bottom: 1px solid var(--border-subtle);
+
+        &--tips {
+            border-bottom: none;
+            flex: 1;
+        }
+    }
+
+    .rs-section-title {
+        display: flex;
+        align-items: center;
+        gap: var(--space-2);
+        font-size: 11px;
+        font-weight: 700;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        margin-bottom: var(--space-3);
+
+        svg { color: var(--text-muted); }
+
+        &--tips { color: var(--text-muted); }
+    }
+
+    // ── Template CTA ──────────────────────────────
+    .rs-template-btn {
+        display: flex;
+        align-items: center;
+        gap: var(--space-3);
+        width: 100%;
+        background: var(--bg-tertiary);
+        border: 1px solid var(--border-subtle);
+        border-radius: var(--radius-lg);
+        padding: var(--space-3);
+        cursor: pointer;
+        transition: all var(--transition-fast);
+        text-align: left;
+
+        &:hover {
+            border-color: var(--accent-primary);
+            background: color-mix(in srgb, var(--accent-primary) 6%, var(--bg-tertiary));
+
+            .rs-template-icon { background: var(--accent-primary); color: #000; }
+            .rs-template-arrow { color: var(--accent-primary); opacity: 1; }
+        }
+    }
+
+    .rs-template-icon {
+        width: 36px;
+        height: 36px;
+        border-radius: var(--radius-md);
+        background: color-mix(in srgb, var(--accent-primary) 15%, var(--bg-tertiary));
+        color: var(--accent-primary);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        transition: all var(--transition-fast);
+    }
+
+    .rs-template-text {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+    }
+
+    .rs-template-name {
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--text-primary);
+    }
+
+    .rs-template-sub {
+        font-size: 11px;
+        color: var(--text-muted);
+    }
+
+    .rs-template-arrow {
+        color: var(--text-muted);
+        opacity: 0.5;
+        flex-shrink: 0;
+        transition: all var(--transition-fast);
+    }
+
+    // ── Recent list ───────────────────────────────
+    .rs-list {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+    }
+
+    .rs-list-item {
+        display: flex;
+        align-items: center;
+        gap: var(--space-3);
+        padding: 8px var(--space-2);
+        border-radius: var(--radius-md);
+        cursor: pointer;
+        transition: background var(--transition-fast);
+
+        &:hover {
+            background: var(--bg-tertiary);
+
+            .rs-list-name { color: var(--text-primary); }
+        }
+    }
+
+    .rs-list-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: var(--border-strong);
+        flex-shrink: 0;
+    }
+
+    .rs-list-info {
+        display: flex;
+        flex-direction: column;
+        gap: 1px;
+        flex: 1;
+        overflow: hidden;
+    }
+
+    .rs-list-name {
+        font-size: 13px;
+        font-weight: 500;
+        color: var(--text-secondary);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        transition: color var(--transition-fast);
+    }
+
+    .rs-list-meta {
+        font-size: 11px;
+        color: var(--text-muted);
+    }
+
+    // ── Tips ──────────────────────────────────────
+    .rs-tips {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-3);
+        list-style: none;
+    }
+
+    .rs-tip-item {
+        display: flex;
+        align-items: flex-start;
+        gap: var(--space-2);
+        font-size: 12px;
+        color: var(--text-muted);
+        line-height: 1.5;
+    }
+
+    .rs-tip-num {
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        background: var(--bg-tertiary);
+        border: 1px solid var(--border-subtle);
+        color: var(--text-muted);
+        font-size: 10px;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        margin-top: 1px;
+    }
+}

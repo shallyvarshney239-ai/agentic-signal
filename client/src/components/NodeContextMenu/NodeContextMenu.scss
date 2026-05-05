@@ -1,0 +1,91 @@
+/* =====================================================
+   NODE CONTEXT MENU — Dark themed popup
+   ===================================================== */
+
+.node-context-menu {
+    background: #1a2130 !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    border-radius: 10px !important;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), 0 2px 8px rgba(0, 0, 0, 0.3) !important;
+    min-width: 180px !important;
+    padding: 4px 0 !important;
+
+    .menu-header {
+        padding: 8px 16px 6px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        margin-bottom: 4px;
+
+        .node-name {
+            color: #6b7280 !important;
+            font-size: 11px !important;
+            font-weight: 500 !important;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+    }
+
+    .menu-item {
+        padding: 10px 16px !important;
+        min-height: 40px !important;
+        transition: background 0.15s ease !important;
+
+        .MuiListItemIcon-root {
+            min-width: 32px !important;
+            color: #9aa4af;
+        }
+
+        .MuiListItemText-primary {
+            font-family: 'Inter', system-ui, sans-serif !important;
+            font-size: 13px !important;
+            font-weight: 500 !important;
+        }
+
+        &.disconnect {
+            .MuiListItemIcon-root {
+                color: var(--accent-primary, #14B8A6);
+            }
+
+            .MuiListItemText-primary {
+                color: #e6edf3;
+            }
+
+            &:hover {
+                background: rgba(20, 184, 166, 0.12) !important;
+
+                .MuiListItemIcon-root {
+                    color: #14B8A6;
+                }
+
+                .MuiListItemText-primary {
+                    color: #14B8A6;
+                }
+            }
+        }
+
+        &.delete {
+            .MuiListItemIcon-root {
+                color: #ef4444;
+            }
+
+            .MuiListItemText-primary {
+                color: #e6edf3;
+            }
+
+            &:hover {
+                background: rgba(239, 68, 68, 0.12) !important;
+
+                .MuiListItemIcon-root {
+                    color: #ef4444;
+                }
+
+                .MuiListItemText-primary {
+                    color: #ef4444;
+                }
+            }
+        }
+
+        &:active {
+            transform: scale(0.98);
+        }
+    }
+}

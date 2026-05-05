@@ -1,0 +1,377 @@
+/* =====================================================
+   APP LAYOUT — CSS Grid
+   ===================================================== */
+
+.app-layout {
+    display: flex;
+    flex-direction: column;
+    width: 100vw;
+    height: 100vh;
+    background: var(--bg-primary);
+    overflow: hidden;
+}
+
+.app-body {
+    display: flex;
+    flex: 1;
+    min-height: 0;    /* critical: allows flex children to shrink below content size */
+    overflow: hidden;
+    position: relative;
+}
+
+.app-canvas {
+    flex: 1;
+    min-width: 0;     /* prevents flex overflow */
+    overflow: hidden;
+    position: relative;
+
+    /* Ensure ReactFlow fills the container */
+    .react-flow {
+        width: 100%;
+        height: 100%;
+    }
+}
+
+/* =====================================================
+   REACT FLOW CANVAS — Dark Theme
+   ===================================================== */
+
+.react-flow {
+    background: var(--bg-primary) !important;
+}
+
+/* Radial dot pattern (handled by <Background> prop color) */
+.react-flow__background {
+    background-color: var(--bg-primary) !important;
+}
+
+/* ── Edges — Base Styling (Enhanced Visibility) ──────── */
+.react-flow__edge-path {
+    stroke: #8a9bac !important;
+    stroke-width: 3px !important;
+    stroke-linecap: round !important;
+    transition: stroke 0.2s ease, stroke-width 0.15s ease, filter 0.2s ease !important;
+    filter: drop-shadow(0 0 3px rgba(138, 155, 172, 0.3)) !important;
+}
+
+.react-flow__edge {
+    cursor: pointer;
+}
+
+.react-flow__edge:hover .react-flow__edge-path {
+    stroke: #14b8a6 !important;
+    stroke-width: 4px !important;
+    filter: drop-shadow(0 0 8px rgba(20, 184, 166, 0.6)) !important;
+}
+
+.react-flow__edge.selected .react-flow__edge-path {
+    stroke: #22d3ee !important;
+    stroke-width: 4px !important;
+    filter: drop-shadow(0 0 10px rgba(34, 211, 238, 0.6)) !important;
+}
+
+/* Edge type classes applied by CustomEdge component */
+.react-flow__edge.edge-type-default .react-flow__edge-path {
+    stroke: #8a9bac !important;
+    filter: drop-shadow(0 0 3px rgba(138, 155, 172, 0.3)) !important;
+}
+
+.react-flow__edge.edge-type-data .react-flow__edge-path {
+    stroke: #2dd4bf !important;
+    filter: drop-shadow(0 0 5px rgba(45, 212, 191, 0.4)) !important;
+}
+
+.react-flow__edge.edge-type-trigger .react-flow__edge-path {
+    stroke: #67e8f9 !important;
+    filter: drop-shadow(0 0 5px rgba(103, 232, 249, 0.4)) !important;
+}
+
+.react-flow__edge.edge-type-tool .react-flow__edge-path {
+    stroke: #d8b4fe !important;
+    filter: drop-shadow(0 0 5px rgba(216, 180, 254, 0.4)) !important;
+}
+
+/* Type-specific hover effects */
+.react-flow__edge.edge-type-default:hover .react-flow__edge-path {
+    stroke: #94a3b8 !important;
+    filter: drop-shadow(0 0 8px rgba(148, 163, 184, 0.5)) !important;
+}
+
+.react-flow__edge.edge-type-data:hover .react-flow__edge-path {
+    stroke: #2dd4bf !important;
+    filter: drop-shadow(0 0 10px rgba(45, 212, 191, 0.6)) !important;
+}
+
+.react-flow__edge.edge-type-trigger:hover .react-flow__edge-path {
+    stroke: #67e8f9 !important;
+    filter: drop-shadow(0 0 10px rgba(103, 232, 249, 0.6)) !important;
+}
+
+.react-flow__edge.edge-type-tool:hover .react-flow__edge-path {
+    stroke: #e879f9 !important;
+    filter: drop-shadow(0 0 10px rgba(232, 121, 249, 0.6)) !important;
+}
+
+/* Type-specific selected effects */
+.react-flow__edge.edge-type-data.selected .react-flow__edge-path {
+    stroke: #5eead4 !important;
+    filter: drop-shadow(0 0 12px rgba(94, 234, 212, 0.7)) !important;
+}
+
+.react-flow__edge.edge-type-trigger.selected .react-flow__edge-path {
+    stroke: #a5f3fc !important;
+    filter: drop-shadow(0 0 12px rgba(165, 243, 252, 0.7)) !important;
+}
+
+.react-flow__edge.edge-type-tool.selected .react-flow__edge-path {
+    stroke: #f0abfc !important;
+    filter: drop-shadow(0 0 12px rgba(240, 171, 252, 0.7)) !important;
+}
+
+/* Animated edges (data flow during execution) */
+.react-flow__edge.animated .react-flow__edge-path {
+    stroke-dasharray: 12 6 !important;
+    animation: dash 1s linear infinite;
+}
+
+.react-flow__edge.edge-type-default.animated .react-flow__edge-path {
+    stroke: #94a3b8 !important;
+}
+
+.react-flow__edge.edge-type-data.animated .react-flow__edge-path {
+    stroke: #2dd4bf !important;
+    filter: drop-shadow(0 0 6px rgba(45, 212, 191, 0.5)) !important;
+}
+
+.react-flow__edge.edge-type-trigger.animated .react-flow__edge-path {
+    stroke: #67e8f9 !important;
+    filter: drop-shadow(0 0 6px rgba(103, 232, 249, 0.5)) !important;
+}
+
+.react-flow__edge.edge-type-tool.animated .react-flow__edge-path {
+    stroke: #e879f9 !important;
+    filter: drop-shadow(0 0 6px rgba(232, 121, 249, 0.5)) !important;
+}
+
+@keyframes dash {
+    to { stroke-dashoffset: -18; }
+}
+
+/* ── Connection Line (during drag) ──────────────────── */
+.react-flow__connection-path,
+.react-flow__connection-line {
+    stroke: #22d3ee !important;
+    stroke-width: 4px !important;
+    stroke-linecap: round !important;
+    stroke-dasharray: 16 8 !important;
+    animation: connection-flow 0.6s linear infinite;
+    filter: drop-shadow(0 0 12px rgba(34, 211, 238, 0.7)) !important;
+}
+
+@keyframes connection-flow {
+    to { stroke-dashoffset: -24; }
+}
+
+/* Invalid connection line */
+.react-flow__connection-line.invalid,
+.react-flow__connection-path.invalid {
+    stroke: #f87171 !important;
+    filter: drop-shadow(0 0 8px rgba(248, 113, 113, 0.5)) !important;
+}
+
+/* ── Edge arrow markers ──────────────────────────────── */
+.react-flow__arrowhead path {
+    fill: inherit !important;
+}
+
+/* Edge markers match edge color */
+.react-flow__edge.edge-type-data .react-flow__arrowhead path { fill: #14b8a6 !important; }
+.react-flow__edge.edge-type-trigger .react-flow__arrowhead path { fill: #22d3ee !important; }
+.react-flow__edge.edge-type-tool .react-flow__arrowhead path { fill: #c084fc !important; }
+.react-flow__edge.edge-type-default .react-flow__arrowhead path { fill: #7c8a99 !important; }
+
+.react-flow__edge:hover .react-flow__arrowhead path { fill: #14b8a6 !important; }
+.react-flow__edge.selected .react-flow__arrowhead path { fill: #22d3ee !important; }
+
+/* ── Selection ──────────────────────────────────────── */
+.react-flow__selection {
+    background: rgba(20, 184, 166, 0.08) !important;
+    border: 1.5px solid var(--accent-primary) !important;
+    border-radius: 8px !important;
+}
+
+/* ── Node hover/select ──────────────────────────────── */
+.react-flow__node {
+    cursor: grab !important;
+    transition: transform 0.15s ease, filter 0.15s ease !important;
+}
+
+.react-flow__node:hover {
+    transform: scale(1.01);
+    z-index: 10 !important;
+}
+
+.react-flow__node.dragging {
+    cursor: grabbing !important;
+    transform: scale(1.02);
+    filter: drop-shadow(0 8px 24px rgba(0, 0, 0, 0.5));
+    z-index: 1000 !important;
+}
+
+.react-flow__node.selected > * {
+    outline: 2px solid var(--accent-primary) !important;
+    outline-offset: 2px !important;
+    border-radius: 12px;
+}
+
+/* ── Handles ───────────────────────────────────────── */
+.react-flow__handle {
+    width: 14px !important;
+    height: 14px !important;
+    background: var(--bg-secondary) !important;
+    border: 2.5px solid #11161c !important;
+    border-radius: 50% !important;
+    transition: all 0.18s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4) !important;
+}
+
+.react-flow__handle:hover {
+    transform: scale(1.55) !important;
+    box-shadow:
+        0 4px 16px rgba(0, 0, 0, 0.35),
+        0 0 0 4px color-mix(in srgb, var(--node-color, #14B8A6) 25%, transparent) !important;
+    border-color: var(--node-color, #14B8A6) !important;
+}
+
+/* Connecting state - handle being dragged from */
+.react-flow__handle.connecting {
+    animation: handle-connect 0.6s ease-in-out infinite;
+}
+
+/* Valid connection target */
+.react-flow__handle.valid-connection {
+    background: #22c55e !important;
+    border-color: #22c55e !important;
+    box-shadow:
+        0 0 0 4px rgba(34, 197, 94, 0.35),
+        0 0 16px rgba(34, 197, 94, 0.5) !important;
+    animation: valid-handle-pulse 0.8s ease-in-out infinite;
+}
+
+/* Invalid connection target */
+.react-flow__handle.invalid-connection {
+    background: #ef4444 !important;
+    border-color: #ef4444 !important;
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.3) !important;
+    transform: scale(1.1) !important;
+    opacity: 0.75;
+}
+
+/* Valid target highlight during connection drag */
+.react-flow__handle.valid-target {
+    animation: target-glow 1s ease-in-out infinite;
+    box-shadow:
+        0 0 0 4px rgba(34, 197, 94, 0.4),
+        0 0 20px rgba(34, 197, 94, 0.6) !important;
+}
+
+@keyframes handle-connect {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.2); }
+}
+
+@keyframes valid-handle-pulse {
+    0%, 100% { transform: scale(1); box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.35), 0 0 16px rgba(34, 197, 94, 0.5); }
+    50% { transform: scale(1.15); box-shadow: 0 0 0 6px rgba(34, 197, 94, 0.25), 0 0 24px rgba(34, 197, 94, 0.6); }
+}
+
+@keyframes target-glow {
+    0%, 100% { transform: scale(1.2); box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.4), 0 0 20px rgba(34, 197, 94, 0.6); }
+    50% { transform: scale(1.4); box-shadow: 0 0 0 6px rgba(34, 197, 94, 0.3), 0 0 28px rgba(34, 197, 94, 0.7); }
+}
+
+/* Handle position offsets */
+.react-flow__handle-left { left: -8px !important; }
+.react-flow__handle-right { right: -8px !important; }
+.react-flow__handle-bottom { bottom: -8px !important; }
+.react-flow__handle-top { top: -8px !important; }
+
+/* ── MiniMap ───────────────────────────────────────── */
+.react-flow__minimap {
+    background: var(--bg-secondary) !important;
+    border: 2px solid var(--border-strong) !important;
+    border-radius: var(--radius-lg) !important;
+    overflow: hidden !important;
+    box-shadow: var(--shadow-md), 0 0 20px rgba(0, 0, 0, 0.4) !important;
+}
+
+.react-flow__minimap-mask {
+    fill: rgba(11, 15, 20, 0.75) !important;
+}
+
+.react-flow__minimap svg {
+    border-radius: calc(var(--radius-lg) - 2px) !important;
+}
+
+/* ── Controls ──────────────────────────────────────── */
+.react-flow__controls {
+    background: rgba(17, 22, 28, 0.85) !important;
+    backdrop-filter: blur(10px) !important;
+    border: 1px solid var(--border-subtle) !important;
+    border-radius: var(--radius-lg) !important;
+    box-shadow: var(--shadow-md) !important;
+    overflow: hidden !important;
+}
+
+.react-flow__controls-button {
+    background: transparent !important;
+    border: none !important;
+    border-bottom: 1px solid var(--border-subtle) !important;
+    color: var(--text-secondary) !important;
+    width: 32px !important;
+    height: 32px !important;
+    transition: all 0.15s ease !important;
+
+    &:last-child { border-bottom: none !important; }
+
+    &:hover {
+        background: var(--bg-tertiary) !important;
+        color: var(--accent-primary) !important;
+    }
+
+    svg {
+        fill: currentColor !important;
+        width: 14px !important;
+        height: 14px !important;
+    }
+}
+
+/* ── Panel (removes default styling) ─────────────── */
+.react-flow__panel {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+
+/* ── Attribution ───────────────────────────────────── */
+.react-flow__attribution { display: none !important; }
+
+/* ── Viewport ─────────────────────────────────────── */
+.react-flow__viewport {
+    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+/* =====================================================
+   VERSION TAG
+   ===================================================== */
+.version-tag {
+    position: fixed !important;
+    top: 72px !important;
+    right: 16px !important;
+    z-index: 500 !important;
+    background: var(--bg-tertiary) !important;
+    color: var(--text-muted) !important;
+    border: 1px solid var(--border-subtle) !important;
+    font-size: 11px !important;
+    font-weight: 600 !important;
+}

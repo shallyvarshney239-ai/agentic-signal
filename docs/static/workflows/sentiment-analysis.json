@@ -1,0 +1,114 @@
+{
+    "nodes": [
+        {
+            "id": "f1a2b3c4-d5e6-4f1f-9a0b-1c2d3e4f5a6b",
+            "type": "data-source",
+            "position": {
+                "x": 80,
+                "y": 90
+            },
+            "data": {
+                "title": "Data Source",
+                "dataSource": {
+                    "value": {
+                        "text": "Analyze the sentiment of each customer review below:\n\n1. \"The product arrived damaged and customer support was unhelpful.\"\n2. \"Absolutely love this! Best purchase I've made this year.\"\n3. \"It works okay. Nothing special but gets the job done.\"\n4. \"Terrible quality. Broke after two days of use. Would not recommend.\"\n5. \"Great value for money. Shipping was fast and packaging was excellent.\"\n6. \"Disappointed. The color doesn't match the photos at all.\"\n7. \"Outstanding service and the product exceeded my expectations!\"" ,
+                        "files": []
+                    },
+                    "type": "markdown"
+                }
+            },
+            "measured": {
+                "width": 160,
+                "height": 40
+            },
+            "selected": false,
+            "dragging": false
+        },
+        {
+            "id": "f2b3c4d5-e6a1-4f2b-0b1c-2d3e4f5a6b7c",
+            "type": "llm-process",
+            "position": {
+                "x": 320,
+                "y": 90
+            },
+            "data": {
+                "title": "AI Data Processing",
+                "model": "",
+                "prompt": "You are a sentiment analysis AI. Analyze each review and classify it as POSITIVE, NEGATIVE, or NEUTRAL with a confidence score (0-1).\n\nOutput ONLY a valid JSON array with no additional text:\n[\n  {\"review\": \"review text\", \"sentiment\": \"POSITIVE|NEGATIVE|NEUTRAL\", \"confidence\": 0.XX},\n  ...\n]",
+                "message": {},
+                "format": {},
+                "maxFeedbackLoops": 0
+            },
+            "measured": {
+                "width": 160,
+                "height": 40
+            },
+            "selected": false,
+            "dragging": false
+        },
+        {
+            "id": "f3c4d5e6-a1b2-4f3c-0b1c-2d3e4f5a6b7d",
+            "type": "json-reformatter",
+            "position": {
+                "x": 560,
+                "y": 90
+            },
+            "data": {
+                "title": "JSON Reformatter",
+                "jsonataExpression": "{\n  \"title\": \"Sentiment Analysis Results\",\n  \"labels\": $[][].sentiment,\n  \"data\": $[][].confidence\n}"
+            },
+            "measured": {
+                "width": 120,
+                "height": 40
+            },
+            "selected": false,
+            "dragging": false
+        },
+        {
+            "id": "f4d5e6a1-b2c3-4f4d-1b2c-3d4e5f6a7b8c",
+            "type": "chart",
+            "position": {
+                "x": 760,
+                "y": 90
+            },
+            "data": {
+                "title": "Display Chart"
+            },
+            "measured": {
+                "width": 120,
+                "height": 40
+            },
+            "selected": false,
+            "dragging": false
+        }
+    ],
+    "edges": [
+        {
+            "type": "smoothstep",
+            "animated": false,
+            "source": "f1a2b3c4-d5e6-4f1f-9a0b-1c2d3e4f5a6b",
+            "sourceHandle": "right-source",
+            "target": "f2b3c4d5-e6a1-4f2b-0b1c-2d3e4f5a6b7c",
+            "targetHandle": "left-target",
+            "id": "edge-datasource-llm-sentiment"
+        },
+        {
+            "type": "smoothstep",
+            "animated": false,
+            "source": "f2b3c4d5-e6a1-4f2b-0b1c-2d3e4f5a6b7c",
+            "sourceHandle": "right-source",
+            "target": "f3c4d5e6-a1b2-4f3c-0b1c-2d3e4f5a6b7d",
+            "targetHandle": "left-target",
+            "id": "edge-llm-reformatter-sentiment"
+        },
+        {
+            "type": "smoothstep",
+            "animated": false,
+            "source": "f3c4d5e6-a1b2-4f3c-0b1c-2d3e4f5a6b7d",
+            "sourceHandle": "right-source",
+            "target": "f4d5e6a1-b2c3-4f4d-1b2c-3d4e5f6a7b8c",
+            "targetHandle": "left-target",
+            "id": "edge-reformatter-chart-sentiment"
+        }
+    ]
+}

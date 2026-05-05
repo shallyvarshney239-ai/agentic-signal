@@ -1,0 +1,523 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
+
+/* =====================================================
+   DESIGN SYSTEM: Agentic Signal — Dark Developer Grade
+   Based on frontend_theme.md specification
+   ===================================================== */
+
+:root {
+  /* Typography */
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  line-height: 1.6;
+  font-weight: 400;
+  font-size: 14px;
+
+  /* === BACKGROUNDS === */
+  --bg-primary:   #0B0F14;  /* Main canvas background */
+  --bg-secondary: #11161C;  /* Panels: topbar, sidebars */
+  --bg-tertiary:  #151B23;  /* Elevated surfaces, hover states */
+  --bg-overlay:   rgba(11, 15, 20, 0.85);
+
+  /* === BORDERS === */
+  --border-subtle: #1F2630;
+  --border-strong: #2A3440;
+
+  /* === TEXT === */
+  --text-primary:   #E6EDF3;
+  --text-secondary: #9AA4AF;
+  --text-muted:     #6B7280;
+
+  /* === ACCENTS === */
+  --accent-primary:  #14B8A6;  /* Teal – main brand / triggers */
+  --accent-hover:    #0EA5A4;
+  --accent-blue:     #3B82F6;  /* Data nodes */
+  --accent-orange:   #F59E0B;  /* Logic nodes */
+  --accent-green:    #22C55E;  /* Integration nodes */
+  --accent-purple:   #8B5CF6;  /* AI nodes */
+
+  /* === FEEDBACK === */
+  --success: #22C55E;
+  --warning: #F59E0B;
+  --error:   #EF4444;
+
+  /* Legacy compatibility: keep --color-primary for existing components */
+  --color-primary:       var(--accent-primary);
+  --color-primary-hover: var(--accent-hover);
+  --color-on-surface:    var(--text-primary);
+  --color-secondary:     var(--text-secondary);
+
+  /* === SPACING (8px grid) === */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+
+  /* === RADII === */
+  --radius-sm:   6px;
+  --radius-md:   8px;
+  --radius-lg:   12px;
+  --radius-xl:   16px;
+  --radius-pill: 9999px;
+
+  /* === SHADOWS === */
+  --shadow-sm:  0 1px 3px rgba(0,0,0,0.3), 0 1px 2px rgba(0,0,0,0.2);
+  --shadow-md:  0 4px 12px rgba(0,0,0,0.4), 0 2px 6px rgba(0,0,0,0.3);
+  --shadow-lg:  0 10px 28px rgba(0,0,0,0.5), 0 4px 12px rgba(0,0,0,0.35);
+  --shadow-teal: 0 0 16px rgba(20, 184, 166, 0.35);
+
+  /* === TRANSITIONS === */
+  --transition-fast: 120ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-base: 200ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: 350ms cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* === LAYOUT === */
+  --topbar-height:      64px;
+  --left-sidebar-width: 260px;
+  --right-sidebar-width: 300px;
+}
+
+/* =====================================================
+   BASE RESET & LAYOUT
+   ===================================================== */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow: hidden;
+}
+
+/* =====================================================
+   DARK SCROLLBAR
+   ===================================================== */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-secondary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-strong);
+  border-radius: var(--radius-pill);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}
+
+/* =====================================================
+   SELECTION
+   ===================================================== */
+::selection {
+  background: rgba(20, 184, 166, 0.3);
+  color: var(--text-primary);
+}
+
+/* =====================================================
+   FOCUS
+   ===================================================== */
+*:focus-visible {
+  outline: 2px solid var(--accent-primary);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+/* =====================================================
+   GLOBAL ANIMATIONS
+   ===================================================== */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideInLeft {
+  from { opacity: 0; transform: translateX(-16px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(20, 184, 166, 0.4); }
+  50%       { box-shadow: 0 0 0 8px rgba(20, 184, 166, 0); }
+}
+
+/* Common interactive elements */
+button, a, input, select, textarea {
+  transition: all var(--transition-base);
+}
+
+/* =====================================================
+   MUI DARK OVERRIDES (global)
+   ===================================================== */
+.MuiDialog-paper {
+  background: var(--bg-secondary) !important;
+  color: var(--text-primary) !important;
+  border: 1px solid var(--border-subtle) !important;
+  border-radius: var(--radius-xl) !important;
+  box-shadow: var(--shadow-lg) !important;
+}
+
+.MuiDialogTitle-root {
+  color: var(--text-primary) !important;
+  font-family: 'Inter', system-ui, sans-serif !important;
+  font-weight: 700 !important;
+  border-bottom: 1px solid var(--border-subtle) !important;
+  padding: 20px 24px !important;
+}
+
+.MuiDialogContent-root {
+  color: var(--text-primary) !important;
+  font-family: 'Inter', system-ui, sans-serif !important;
+  padding: 24px !important;
+}
+
+.MuiDialogActions-root {
+  border-top: 1px solid var(--border-subtle) !important;
+  padding: 16px 24px !important;
+  background: var(--bg-tertiary) !important;
+}
+
+.MuiTooltip-tooltip {
+  background: var(--bg-tertiary) !important;
+  color: var(--text-primary) !important;
+  font-size: 12px !important;
+  font-family: 'Inter', system-ui, sans-serif !important;
+  border-radius: var(--radius-md) !important;
+  padding: 6px 12px !important;
+  border: 1px solid var(--border-subtle) !important;
+  box-shadow: var(--shadow-md) !important;
+}
+
+.MuiTooltip-arrow { color: var(--bg-tertiary) !important; }
+
+.MuiButton-root {
+  font-family: 'Inter', system-ui, sans-serif !important;
+  text-transform: none !important;
+  font-weight: 600 !important;
+  border-radius: var(--radius-md) !important;
+}
+
+.MuiButton-containedPrimary {
+  background: var(--accent-primary) !important;
+  color: #000 !important;
+  &:hover { background: var(--accent-hover) !important; }
+}
+
+.MuiButton-outlined {
+  border-color: var(--border-strong) !important;
+  color: var(--text-primary) !important;
+  &:hover { background: var(--bg-tertiary) !important; border-color: var(--accent-primary) !important; }
+}
+
+.MuiOutlinedInput-root {
+  border-radius: var(--radius-md) !important;
+  font-family: 'Inter', system-ui, sans-serif !important;
+  background: var(--bg-tertiary) !important;
+  color: var(--text-primary) !important;
+}
+
+.MuiOutlinedInput-notchedOutline {
+  border-color: var(--border-subtle) !important;
+}
+
+.MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline {
+  border-color: var(--border-strong) !important;
+}
+
+.MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline {
+  border-color: var(--accent-primary) !important;
+}
+
+.MuiInputLabel-root {
+  color: var(--text-secondary) !important;
+  font-family: 'Inter', system-ui, sans-serif !important;
+}
+
+.MuiSelect-select, .MuiMenuItem-root {
+  color: var(--text-primary) !important;
+  font-family: 'Inter', system-ui, sans-serif !important;
+}
+
+.MuiMenuItem-root:hover { background: var(--bg-tertiary) !important; }
+
+.MuiPaper-root.MuiMenu-paper {
+  background: var(--bg-secondary) !important;
+  border: 1px solid var(--border-subtle) !important;
+  border-radius: var(--radius-lg) !important;
+  box-shadow: var(--shadow-lg) !important;
+}
+
+.MuiSnackbarContent-root {
+  background: var(--bg-tertiary) !important;
+  color: var(--text-primary) !important;
+  border: 1px solid var(--border-subtle) !important;
+  border-radius: var(--radius-lg) !important;
+  box-shadow: var(--shadow-md) !important;
+}
+
+.MuiChip-root {
+  font-family: 'Inter', system-ui, sans-serif !important;
+  border-radius: var(--radius-pill) !important;
+  background: var(--bg-tertiary) !important;
+  color: var(--text-secondary) !important;
+  border: 1px solid var(--border-subtle) !important;
+}
+
+.MuiTabs-root {
+  background: var(--bg-tertiary) !important;
+  border-radius: var(--radius-md) !important;
+  padding: 4px !important;
+  border: 1px solid var(--border-subtle) !important;
+}
+
+.MuiTab-root {
+  font-family: 'Inter', system-ui, sans-serif !important;
+  text-transform: none !important;
+  color: var(--text-secondary) !important;
+  font-weight: 500 !important;
+}
+
+.MuiTab-root.Mui-selected {
+  color: var(--text-primary) !important;
+  background: var(--bg-secondary) !important;
+  border-radius: 6px !important;
+}
+
+.MuiTabs-indicator { display: none !important; }
+
+/* =====================================================
+   RESPONSIVE
+   ===================================================== */
+@media (max-width: 768px) {
+  :root {
+    --left-sidebar-width: 220px;
+    --right-sidebar-width: 0px;
+    font-size: 13px;
+  }
+}
+
+@media print {
+  .topbar, .left-sidebar, .right-sidebar { display: none !important; }
+}
+
+
+/* =====================================================
+   DESIGN SYSTEM: Precision Intelligence (Agentic Signal)
+   Enhanced for Smooth UX
+   ===================================================== */
+
+:root {
+  /* Typography */
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  line-height: 1.6;
+  font-weight: 400;
+  font-size: 14px;
+
+  /* Color Tokens */
+  --color-primary: #00685f;
+  --color-primary-hover: #005049;
+  --color-primary-light: #89f5e7;
+  --color-primary-dim: #6bd8cb;
+
+  --color-surface: #f8fafa;
+  --color-surface-low: #f0f5f2;
+  --color-surface-container: #eaefed;
+  --color-surface-white: #ffffff;
+  --color-surface-dim: #d6dbd9;
+  --color-surface-high: #e4e9e7;
+
+  --color-on-surface: #171d1c;
+  --color-on-surface-variant: #3d4947;
+  --color-outline: #6d7a77;
+  --color-outline-variant: #d0d8d5;
+
+  --color-secondary: #565e74;
+  --color-secondary-container: #dae2fd;
+
+  --color-tertiary: #924628;
+  --color-error: #ba1a1a;
+
+  /* Elevation Shadows - Enhanced */
+  --shadow-1: 0 2px 8px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0, 0, 0, 0.04);
+  --shadow-2: 0 6px 20px rgba(0, 0, 0, 0.08), 0 2px 6px rgba(0, 0, 0, 0.04);
+  --shadow-3: 0 16px 40px rgba(0, 0, 0, 0.10), 0 4px 12px rgba(0, 0, 0, 0.06);
+
+  /* Border Radius */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 20px;
+  --radius-pill: 9999px;
+
+  /* Spacing */
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+
+  /* Transitions - Smooth */
+  --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-base: 250ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: 400ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* =====================================================
+   BASE RESET & LAYOUT
+   ===================================================== */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  background: var(--color-surface);
+  color: var(--color-on-surface);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow: hidden;
+}
+
+/* =====================================================
+   SMOOTH SCROLLBAR - Modern Design
+   ===================================================== */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-surface-low);
+  border-radius: var(--radius-pill);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-outline-variant);
+  border-radius: var(--radius-pill);
+  transition: background var(--transition-fast);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-primary);
+}
+
+/* =====================================================
+   SELECTION STYLING
+   ===================================================== */
+::selection {
+  background: var(--color-primary-light);
+  color: var(--color-on-surface);
+}
+
+/* =====================================================
+   FOCUS STATES - Smooth
+   ===================================================== */
+*:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+/* =====================================================
+   SMOOTH ANIMATIONS - Global
+   ===================================================== */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.6;
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Apply smooth transitions to common elements */
+button, a, input, select, textarea {
+  transition: all var(--transition-base);
+}
+
+/* =====================================================
+   RESPONSIVE BREAKPOINTS
+   ===================================================== */
+@media (max-width: 1024px) {
+  :root {
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 768px) {
+  :root {
+    font-size: 12px;
+  }
+}
+
+/* =====================================================
+   PRINT STYLES - Hide Canvas Elements
+   ===================================================== */
+@media print {
+  .react-flow,
+  .dock,
+  .guide-button {
+    display: none !important;
+  }
+}

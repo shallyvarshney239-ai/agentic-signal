@@ -1,0 +1,59 @@
+@use '../../Dock' as mixins;
+
+.actions-dock {
+    @include mixins.dock-wrapper;
+
+    margin-right: 8px;
+
+    .dock-items {
+        .dock-item {
+            cursor: pointer !important;
+            min-width: 48px;
+            max-width: 58px;
+
+            /* Action items: consistent with NodesDock */
+            --item-color: var(--color-primary, #00685f);
+
+            .dock-item-icon-wrapper {
+                background: linear-gradient(135deg, color-mix(in srgb, var(--item-color) 12%, #ffffff) 0%, color-mix(in srgb, var(--item-color) 4%, #f8fafa) 100%) !important;
+                border-radius: 12px !important;
+                width: 38px !important;
+                height: 38px !important;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04), inset 0 1px 0 rgba(255, 255, 255, 0.8) !important;
+                border: 1px solid color-mix(in srgb, var(--item-color) 15%, #e2e8f0) !important;
+            }
+
+            .dock-item-icon {
+                color: var(--color-secondary, #565e74) !important;
+                stroke-width: 1.5 !important;
+            }
+
+            &:hover {
+                background: rgba(0, 104, 95, 0.04) !important;
+                border-color: rgba(0, 104, 95, 0.15) !important;
+
+                .dock-item-icon-wrapper {
+                    background: linear-gradient(135deg, var(--item-color) 0%, color-mix(in srgb, var(--item-color) 80%, #000) 100%) !important;
+                    box-shadow: 0 6px 16px color-mix(in srgb, var(--item-color) 30%, transparent) !important;
+                    transform: scale(1.05) !important;
+                    border-color: transparent !important;
+                }
+
+                .dock-item-icon {
+                    color: #ffffff !important;
+                }
+
+                .dock-item-label {
+                    color: var(--item-color) !important;
+                }
+            }
+
+            .dock-item-label {
+                color: #64748b;
+                font-size: 9.5px;
+                font-weight: 600;
+                transition: color 150ms ease;
+            }
+        }
+    }
+}

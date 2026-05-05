@@ -1,0 +1,131 @@
+{
+    "nodes": [
+        {
+            "id": "abc111de-f222-4a11-9b33-444555666777",
+            "type": "get-data",
+            "position": {
+                "x": 70,
+                "y": 90
+            },
+            "data": {
+                "title": "GET Data",
+                "url": "https://dummyjson.com/users",
+                "dataType": "json"
+            },
+            "measured": {
+                "width": 160,
+                "height": 40
+            },
+            "selected": false,
+            "dragging": false
+        },
+        {
+            "id": "bcd222ef-a333-4b22-0c44-555666777888",
+            "type": "json-reformatter",
+            "position": {
+                "x": 300,
+                "y": 90
+            },
+            "data": {
+                "title": "JSON Reformatter",
+                "jsonataExpression": "(\n  $users := users;\n  $sorted := $sort($users, function($a, $b) { $b.age - $a.age });\n  $filtered := $sorted[age >= 30];\n  {\n    \"title\": \"Users Age Distribution (30+)\",\n    \"labels\": $filtered.firstName,\n    \"data\": $filtered.age\n  }\n)"
+            },
+            "measured": {
+                "width": 120,
+                "height": 40
+            },
+            "selected": false,
+            "dragging": false
+        },
+        {
+            "id": "cde333fa-b444-4c33-1d55-666777888999",
+            "type": "data-validation",
+            "position": {
+                "x": 300,
+                "y": 200
+            },
+            "data": {
+                "title": "Data Validation",
+                "schema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"users\": {\n      \"type\": \"array\",\n      \"items\": {\n        \"type\": \"object\",\n        \"required\": [\"id\", \"firstName\", \"age\"],\n        \"properties\": {\n          \"id\": {\"type\": \"integer\"},\n          \"firstName\": {\"type\": \"string\"},\n          \"age\": {\"type\": \"integer\", \"minimum\": 0, \"maximum\": 120}\n        }\n      }\n    }\n  },\n  \"required\": [\"users\"]\n}"
+            },
+            "measured": {
+                "width": 120,
+                "height": 40
+            },
+            "selected": false,
+            "dragging": false
+        },
+        {
+            "id": "def444ab-c555-4d44-2e66-777888999000",
+            "type": "chart",
+            "position": {
+                "x": 520,
+                "y": 90
+            },
+            "data": {
+                "title": "Display Chart"
+            },
+            "measured": {
+                "width": 120,
+                "height": 40
+            },
+            "selected": false,
+            "dragging": false
+        },
+        {
+            "id": "efg555bc-d666-4e55-3f77-888999000111",
+            "type": "data-flow-spy",
+            "position": {
+                "x": 520,
+                "y": 200
+            },
+            "data": {
+                "title": "Data Flow Spy"
+            },
+            "measured": {
+                "width": 120,
+                "height": 40
+            },
+            "selected": false,
+            "dragging": false
+        }
+    ],
+    "edges": [
+        {
+            "type": "smoothstep",
+            "animated": false,
+            "source": "abc111de-f222-4a11-9b33-444555666777",
+            "sourceHandle": "right-source",
+            "target": "cde333fa-b444-4c33-1d55-666777888999",
+            "targetHandle": "left-target",
+            "id": "edge-getdata-validation-filter"
+        },
+        {
+            "type": "smoothstep",
+            "animated": false,
+            "source": "cde333fa-b444-4c33-1d55-666777888999",
+            "sourceHandle": "right-source",
+            "target": "bcd222ef-a333-4b22-0c44-555666777888",
+            "targetHandle": "left-target",
+            "id": "edge-validation-reformat-filter"
+        },
+        {
+            "type": "smoothstep",
+            "animated": false,
+            "source": "bcd222ef-a333-4b22-0c44-555666777888",
+            "sourceHandle": "right-source",
+            "target": "def444ab-c555-4d44-2e66-777888999000",
+            "targetHandle": "left-target",
+            "id": "edge-reformat-chart-filter"
+        },
+        {
+            "type": "smoothstep",
+            "animated": false,
+            "source": "bcd222ef-a333-4b22-0c44-555666777888",
+            "sourceHandle": "right-source",
+            "target": "efg555bc-d666-4e55-3f77-888999000111",
+            "targetHandle": "left-target",
+            "id": "edge-reformat-spy-filter"
+        }
+    ]
+}

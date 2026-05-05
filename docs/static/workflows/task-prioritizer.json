@@ -1,0 +1,170 @@
+{
+    "nodes": [
+        {
+            "id": "11ab22cd-33ef-4411-88dd-99eeff001122",
+            "type": "data-source",
+            "position": {
+                "x": 70,
+                "y": 90
+            },
+            "data": {
+                "title": "Data Source",
+                "dataSource": {
+                    "value": {
+                        "text": "Prioritize the following tasks based on urgency and importance:",
+                        "files": [
+                            {
+                                "name": "tasks.csv",
+                                "content": "```csv\ntask,deadline,effort_hours,impact\nFix login bug,2026-05-06,2,High\nUpdate homepage design,2026-05-15,8,Medium\nWrite API documentation,2026-05-20,4,Low\nSecurity audit for release,2026-05-05,6,Critical\nRespond to client emails,2026-05-07,1,Low\nDatabase migration planning,2026-05-12,12,High\nTeam training session prep,2026-05-10,3,Medium\n```"
+                            }
+                        ]
+                    },
+                    "type": "markdown"
+                }
+            },
+            "measured": {
+                "width": 160,
+                "height": 40
+            },
+            "selected": false,
+            "dragging": false
+        },
+        {
+            "id": "22bc33de-44fa-4422-99ee-aabbcc112233",
+            "type": "ai-tool",
+            "position": {
+                "x": 310,
+                "y": 220
+            },
+            "data": {
+                "title": "CSV to Array Tool",
+                "toolSubtype": "csv-to-array",
+                "userConfig": {
+                    "requireToolUse": true
+                },
+                "userConfigSchema": {
+                    "requireToolUse": {
+                        "type": "boolean",
+                        "description": "Require tool use (forces the LLM to always call this tool)",
+                        "default": true
+                    }
+                }
+            },
+            "measured": {
+                "width": 120,
+                "height": 40
+            },
+            "selected": false,
+            "dragging": false
+        },
+        {
+            "id": "33cd44ef-55ab-4433-aabb-ddcc33445566",
+            "type": "ai-tool",
+            "position": {
+                "x": 560,
+                "y": 220
+            },
+            "data": {
+                "title": "Sort Tool",
+                "toolSubtype": "sort",
+                "userConfig": {
+                    "requireToolUse": true
+                },
+                "userConfigSchema": {
+                    "requireToolUse": {
+                        "type": "boolean",
+                        "description": "Require tool use (forces the LLM to always call this tool)",
+                        "default": true
+                    }
+                }
+            },
+            "measured": {
+                "width": 120,
+                "height": 40
+            },
+            "selected": false,
+            "dragging": false
+        },
+        {
+            "id": "44de55ef-66bc-4455-bbcc-eedd55667788",
+            "type": "llm-process",
+            "position": {
+                "x": 310,
+                "y": 90
+            },
+            "data": {
+                "title": "AI Task Prioritizer",
+                "model": "",
+                "prompt": "You are a task prioritization AI.\n\nProcess:\n1. Use the \"csvToArray\" tool to parse the CSV input\n2. For each task, calculate a priority score (1-10) using:\n   - deadline proximity (closer = higher)\n   - impact level (Critical=10, High=7, Medium=4, Low=1)\n   - effort hours (lower = higher priority)\n3. Use the \"sort\" tool to sort all tasks by priority score descending\n\nOutput ONLY a valid JSON array sorted by priority (highest first):\n[\n  {\"task\": \"...\", \"deadline\": \"...\", \"effort_hours\": N, \"impact\": \"...\", \"priority_score\": N, \"reason\": \"short reason\"},\n  ...\n]\n\nDo NOT include any explanations or markdown outside the JSON.",
+                "message": {},
+                "format": {
+                    "onSuccess": "{\n    \"type\": \"array\",\n    \"items\": {\n        \"type\": \"object\",\n        \"required\": [\"task\", \"deadline\", \"effort_hours\", \"impact\", \"priority_score\"],\n        \"properties\": {\n            \"task\": {\"type\": \"string\"},\n            \"deadline\": {\"type\": \"string\"},\n            \"effort_hours\": {\"type\": \"number\"},\n            \"impact\": {\"type\": \"string\"},\n            \"priority_score\": {\"type\": \"number\"},\n            \"reason\": {\"type\": \"string\"}\n        }\n    }\n}",
+                    "onError": ""
+                },
+                "maxFeedbackLoops": 0,
+                "maxToolRetries": 3
+            },
+            "measured": {
+                "width": 160,
+                "height": 40
+            },
+            "selected": false,
+            "dragging": false
+        },
+        {
+            "id": "55ef66ab-77cd-4466-ccdd-ffaa66778899",
+            "type": "data-flow-spy",
+            "position": {
+                "x": 560,
+                "y": 90
+            },
+            "data": {
+                "title": "Data Flow Spy"
+            },
+            "measured": {
+                "width": 120,
+                "height": 40
+            },
+            "selected": false,
+            "dragging": false
+        }
+    ],
+    "edges": [
+        {
+            "type": "smoothstep",
+            "animated": false,
+            "source": "11ab22cd-33ef-4411-88dd-99eeff001122",
+            "sourceHandle": "right-source",
+            "target": "44de55ef-66bc-4455-bbcc-eedd55667788",
+            "targetHandle": "left-target",
+            "id": "edge-datasource-llm-tasks"
+        },
+        {
+            "type": "smoothstep",
+            "animated": false,
+            "source": "22bc33de-44fa-4422-99ee-aabbcc112233",
+            "sourceHandle": "right-source",
+            "target": "44de55ef-66bc-4455-bbcc-eedd55667788",
+            "targetHandle": "tools-target",
+            "id": "edge-csvtool-llm-tasks"
+        },
+        {
+            "type": "smoothstep",
+            "animated": false,
+            "source": "33cd44ef-55ab-4433-aabb-ddcc33445566",
+            "sourceHandle": "right-source",
+            "target": "44de55ef-66bc-4455-bbcc-eedd55667788",
+            "targetHandle": "tools-target",
+            "id": "edge-sorttool-llm-tasks"
+        },
+        {
+            "type": "smoothstep",
+            "animated": false,
+            "source": "44de55ef-66bc-4455-bbcc-eedd55667788",
+            "sourceHandle": "right-source",
+            "target": "55ef66ab-77cd-4466-ccdd-ffaa66778899",
+            "targetHandle": "left-target",
+            "id": "edge-llm-spy-tasks"
+        }
+    ]
+}

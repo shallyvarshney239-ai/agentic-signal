@@ -1,0 +1,109 @@
+.canvas-empty-state {
+    pointer-events: none;
+    // ReactFlow Panel with position="top-center" applies its own positioning
+    // We just need to visually center the content on the canvas
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    padding-top: 15vh;
+
+    .empty-state-card {
+        background: transparent;
+        text-align: center;
+        pointer-events: all;
+        width: 380px;
+        animation: fadeIn 0.5s ease-out;
+
+        .empty-state-icon {
+            color: var(--accent-primary);
+            margin-bottom: 24px;
+            opacity: 0.7;
+        }
+
+        .empty-state-title {
+            color: var(--text-primary);
+            font-weight: 700;
+            font-size: 1.6rem;
+            margin-bottom: 10px;
+            letter-spacing: -0.03em;
+        }
+
+        .empty-state-description {
+            color: var(--text-muted);
+            font-size: 0.92rem;
+            margin-bottom: 32px;
+            line-height: 1.6;
+        }
+
+        .empty-state-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .start-template-btn {
+            background: var(--accent-primary) !important;
+            color: #000 !important;
+            font-weight: 700 !important;
+            font-size: 0.9rem !important;
+            padding: 10px 22px !important;
+            border-radius: var(--radius-md) !important;
+            text-transform: none !important;
+            box-shadow: 0 4px 16px rgba(20, 184, 166, 0.35) !important;
+            transition: all 0.2s ease !important;
+
+            &:hover {
+                background: var(--accent-hover) !important;
+                box-shadow: 0 6px 20px rgba(20, 184, 166, 0.5) !important;
+                transform: translateY(-2px) !important;
+            }
+        }
+
+        .add-trigger-btn {
+            background: transparent !important;
+            color: var(--text-secondary) !important;
+            font-weight: 600 !important;
+            font-size: 0.9rem !important;
+            padding: 10px 22px !important;
+            border: 1px solid var(--border-strong) !important;
+            border-radius: var(--radius-md) !important;
+            text-transform: none !important;
+            transition: all 0.2s ease !important;
+
+            &:hover {
+                background: var(--bg-tertiary) !important;
+                border-color: var(--accent-primary) !important;
+                color: var(--accent-primary) !important;
+            }
+        }
+
+        .hint-text {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 24px;
+            color: var(--text-muted);
+            font-size: 12px;
+
+            svg {
+                flex-shrink: 0;
+                opacity: 0.5;
+                color: var(--accent-primary);
+            }
+        }
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(16px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

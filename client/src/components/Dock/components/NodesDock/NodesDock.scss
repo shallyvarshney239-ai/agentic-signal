@@ -1,0 +1,67 @@
+@use '../../Dock' as mixins;
+
+
+.nodes-dock {
+    @include mixins.dock-wrapper;
+
+    .dock-item {
+        gap: 6px;
+        min-width: 64px;
+        max-width: 68px;
+        padding: 8px 6px 7px;
+        border-radius: 14px;
+        border-color: rgba(148, 163, 184, 0.10);
+        transition:
+            background 150ms ease,
+            border-color 150ms ease,
+            box-shadow 150ms ease,
+            transform 150ms ease;
+
+        &:hover {
+            background: color-mix(in srgb, var(--item-color, #00685f) 9%, #ffffff);
+            border-color: color-mix(in srgb, var(--item-color, #00685f) 24%, #e2e8f0);
+            box-shadow: 0 10px 24px color-mix(in srgb, var(--item-color, #00685f) 16%, transparent);
+        }
+
+        &:active {
+            background: color-mix(in srgb, var(--item-color, #00685f) 13%, #ffffff);
+        }
+
+        .dock-item-icon-wrapper {
+            position: relative;
+            width: 38px;
+            height: 38px;
+            margin: 0 auto 4px auto;
+            border-radius: 12px;
+            background: linear-gradient(135deg, color-mix(in srgb, var(--item-color, #00685f) 12%, #ffffff) 0%, color-mix(in srgb, var(--item-color, #00685f) 4%, #f8fafa) 100%);
+            border: 1px solid color-mix(in srgb, var(--item-color, #00685f) 15%, #e2e8f0);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04), inset 0 1px 0 rgba(255, 255, 255, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 150ms ease;
+
+            .dock-item-icon {
+                position: relative;
+                z-index: 1;
+                width: 20px !important;
+                height: 20px !important;
+                color: var(--item-color, #00685f) !important;
+                fill: none !important;
+                stroke: currentColor !important;
+                stroke-width: 1.5 !important;
+                stroke-linecap: round;
+                stroke-linejoin: round;
+                transition: color 150ms ease;
+            }
+        }
+
+        .dock-item-label {
+            font-size: 10px;
+            font-weight: 700;
+            color: #475569;
+            letter-spacing: 0.015em;
+        }
+    }
+
+}

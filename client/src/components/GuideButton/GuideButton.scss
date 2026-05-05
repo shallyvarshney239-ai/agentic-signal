@@ -1,0 +1,271 @@
+/************************************************************************
+ *    Copyright (C) 2025 Code Forge Temple                              *
+ *    This file is part of agentic-signal project                       *
+ *    See the LICENSE file in the project root for license details.     *
+ ************************************************************************/
+
+.guide-button {
+    position: fixed !important;
+    bottom: 80px !important;
+    right: 24px !important;
+    top: auto !important;
+    left: auto !important;
+    z-index: 1000 !important;
+    background: var(--bg-tertiary) !important;
+    color: var(--text-secondary) !important;
+    font-weight: 600 !important;
+    border: 1px solid var(--border-strong) !important;
+    border-radius: var(--radius-md) !important;
+    font-size: 13px !important;
+    padding: 8px 16px !important;
+    transition: all 0.2s ease !important;
+
+    &:hover {
+        background: var(--bg-secondary) !important;
+        border-color: var(--accent-primary) !important;
+        color: var(--accent-primary) !important;
+        box-shadow: 0 0 0 1px var(--accent-primary) !important;
+    }
+}
+
+.guide-highlight-overlay {
+    pointer-events: none;
+}
+
+.guide-dialog {
+    .guide-dialog-title {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 20px 24px !important;
+        background: var(--bg-tertiary);
+        border-bottom: 1px solid var(--border-subtle);
+
+        .guide-title-content {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            flex: 1;
+
+            .guide-step-number {
+                width: 34px;
+                height: 34px;
+                border-radius: 50%;
+                background: var(--accent-primary);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                flex-shrink: 0;
+
+                .step-number-text {
+                    color: #000;
+                    font-weight: 700;
+                    font-size: 0.88rem;
+                }
+            }
+
+            .guide-title-text {
+                display: flex;
+                flex-direction: column;
+                gap: 2px;
+                flex: 1;
+
+                .step-title {
+                    color: var(--text-primary);
+                    font-weight: 700;
+                    margin: 0;
+                    font-size: 1.05rem;
+                }
+
+                .step-target {
+                    color: var(--text-muted);
+                    font-family: 'Fira Code', monospace;
+                    font-size: 0.68rem;
+                    background: var(--bg-primary);
+                    border: 1px solid var(--border-subtle);
+                    padding: 2px 8px;
+                    border-radius: 4px;
+                    display: inline-block;
+                    max-width: 200px;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    white-space: nowrap;
+                }
+            }
+
+            .guide-section-badge {
+                padding: 4px 12px;
+                border-radius: var(--radius-pill);
+                color: #000;
+                font-size: 0.68rem;
+                font-weight: 700;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+                flex-shrink: 0;
+            }
+        }
+
+        .guide-close-button {
+            color: var(--text-muted);
+            &:hover { color: var(--text-primary); background: var(--bg-primary); }
+        }
+    }
+
+    .guide-dialog-content {
+        padding: 20px !important;
+        max-height: 60vh;
+        overflow-y: auto;
+        background: var(--bg-secondary);
+
+        .guide-content-wrapper {
+            background: var(--bg-tertiary);
+            border-radius: var(--radius-lg);
+            padding: 20px;
+            border: 1px solid var(--border-subtle);
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+
+            .guide-description-section {
+                display: flex;
+                gap: 14px;
+                align-items: flex-start;
+
+                .guide-description-icon {
+                    width: 36px;
+                    height: 36px;
+                    border-radius: var(--radius-md);
+                    background: color-mix(in srgb, var(--accent-primary) 15%, var(--bg-tertiary));
+                    color: var(--accent-primary);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    flex-shrink: 0;
+                }
+
+                .guide-description {
+                    color: var(--text-primary);
+                    font-size: 0.95rem;
+                    line-height: 1.6;
+                    margin: 0;
+                    padding-top: 6px;
+                }
+            }
+
+            .guide-action-hint-section {
+                background: var(--bg-secondary);
+                border-radius: var(--radius-md);
+                padding: 14px;
+                border: 1px solid var(--border-subtle);
+
+                .guide-action-hint-header {
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                    margin-bottom: 10px;
+                    color: var(--accent-primary);
+
+                    .action-label {
+                        font-weight: 600;
+                        color: var(--accent-primary);
+                        margin: 0;
+                        font-size: 0.82rem;
+                    }
+                }
+
+                .guide-action-chip {
+                    background: var(--bg-tertiary) !important;
+                    color: var(--text-secondary) !important;
+                    border: 1px solid var(--border-subtle) !important;
+                    font-weight: 500;
+                    font-size: 0.85rem;
+                }
+            }
+
+            .guide-next-preview {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                padding-top: 8px;
+                border-top: 1px dashed var(--border-subtle);
+
+                .next-preview-label { color: var(--text-muted); font-weight: 500; font-size: 0.82rem; }
+                .next-preview-text { color: var(--accent-primary); font-weight: 600; font-size: 0.88rem; }
+            }
+        }
+    }
+
+    .guide-dialog-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+        padding: 16px 20px 20px !important;
+        background: var(--bg-tertiary);
+        border-top: 1px solid var(--border-subtle);
+
+        .guide-stepper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+
+            .step-count { color: var(--text-muted); font-weight: 500; font-size: 12px; }
+
+            .guide-stepper-inner {
+                width: 100%;
+                max-width: 560px;
+
+                .MuiStepConnector-line { border-color: var(--border-subtle); }
+
+                .step-dot {
+                    width: 26px;
+                    height: 26px;
+                    border-radius: 50%;
+                    background: var(--bg-primary);
+                    border: 1px solid var(--border-subtle);
+                    color: var(--text-muted);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: 0.72rem;
+                    font-weight: 600;
+                    cursor: pointer;
+                    transition: all 0.2s ease;
+
+                    &.active {
+                        background: var(--accent-primary);
+                        color: #000;
+                        border-color: var(--accent-primary);
+                        transform: scale(1.1);
+                    }
+                }
+            }
+        }
+
+        .guide-navigation {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            gap: 12px;
+
+            .skip-button { color: var(--text-muted) !important; font-weight: 500; }
+            .nav-buttons { display: flex; gap: 10px; }
+
+            button { min-width: 110px; font-weight: 600; }
+        }
+    }
+}
+
+@media (max-width: 600px) {
+    .guide-button {
+        bottom: 80px !important;
+        right: 16px !important;
+    }
+
+    .guide-dialog {
+        .guide-dialog-title { padding: 14px !important; }
+        .guide-dialog-content { padding: 14px !important; }
+        .guide-dialog-actions { padding: 12px 14px !important; }
+    }
+}

@@ -1,0 +1,206 @@
+{
+    "nodes": [
+        {
+            "id": "rpt001aa-bb22-4a11-9ccc-ddd111222333",
+            "type": "timer",
+            "position": {
+                "x": 60,
+                "y": 90
+            },
+            "data": {
+                "title": "Timer",
+                "mode": "interval",
+                "interval": 604800,
+                "immediate": false,
+                "runOnce": false,
+                "repeat": "every"
+            },
+            "measured": {
+                "width": 160,
+                "height": 40
+            },
+            "selected": false,
+            "dragging": false
+        },
+        {
+            "id": "rpt002bc-cc33-4b22-0ddd-eee222333444",
+            "type": "get-data",
+            "position": {
+                "x": 100,
+                "y": 220
+            },
+            "data": {
+                "title": "GET Stock Data",
+                "url": "https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=AAPL&apikey=demo",
+                "dataType": "json"
+            },
+            "measured": {
+                "width": 160,
+                "height": 40
+            },
+            "selected": false,
+            "dragging": false
+        },
+        {
+            "id": "rpt003cd-dd44-4c33-1eee-fff333444555",
+            "type": "get-data",
+            "position": {
+                "x": 100,
+                "y": 300
+            },
+            "data": {
+                "title": "GET News Data",
+                "url": "https://dummyjson.com/posts?limit=10",
+                "dataType": "json"
+            },
+            "measured": {
+                "width": 160,
+                "height": 40
+            },
+            "selected": false,
+            "dragging": false
+        },
+        {
+            "id": "rpt004de-ee55-4d44-2fff-aaa444555666",
+            "type": "async-data-aggregator",
+            "position": {
+                "x": 340,
+                "y": 90
+            },
+            "data": {
+                "title": "Async Data Aggregator"
+            },
+            "measured": {
+                "width": 80,
+                "height": 40
+            },
+            "selected": false,
+            "dragging": false
+        },
+        {
+            "id": "rpt005ef-ff66-4e55-3aaa-bbb555666777",
+            "type": "json-reformatter",
+            "position": {
+                "x": 340,
+                "y": 250
+            },
+            "data": {
+                "title": "JSON Reformatter",
+                "jsonataExpression": "(\n  $stock := $[0];\n  $news := $[1];\n  {\n    \"stockPrice\": $lookup($lookup($stock, \"Global Quote\"), \"05. price\"),\n    \"stockSymbol\": $lookup($lookup($stock, \"Global Quote\"), \"01. symbol\"),\n    \"newsPosts\": $news.posts.([\"title\", \"body\"])\n  }\n)"
+            },
+            "measured": {
+                "width": 120,
+                "height": 40
+            },
+            "selected": false,
+            "dragging": false
+        },
+        {
+            "id": "rpt006fa-aa77-4f66-4bbb-ccc666777888",
+            "type": "llm-process",
+            "position": {
+                "x": 560,
+                "y": 90
+            },
+            "data": {
+                "title": "AI Report Generator",
+                "model": "",
+                "prompt": "You are a weekly business report generator. Using the provided stock data and recent news, generate a concise weekly summary.\n\nOutput ONLY a valid JSON object:\n{\n  \"reportTitle\": \"Weekly Business Report\",\n  \"generatedDate\": \"YYYY-MM-DD\",\n  \"stockSummary\": {\n    \"symbol\": \"...\",\n    \"currentPrice\": \"...\",\n    \"trend\": \"UP|DOWN|STABLE\"\n  },\n  \"newsHighlights\": [\"highlight 1\", \"highlight 2\"],\n  \"overallOutlook\": \"short paragraph summarizing the week\",\n  \"keyMetrics\": {\n    \"stocksTracked\": 1,\n    \"newsArticlesAnalyzed\": N\n  }\n}\n\nDo NOT include any explanations or markdown outside the JSON.",
+                "message": {},
+                "format": {
+                    "onSuccess": "{\n  \"type\": \"object\",\n  \"required\": [\"reportTitle\", \"stockSummary\", \"newsHighlights\"],\n  \"properties\": {\n    \"reportTitle\": {\"type\": \"string\"},\n    \"generatedDate\": {\"type\": \"string\"},\n    \"stockSummary\": {\n      \"type\": \"object\",\n      \"properties\": {\n        \"symbol\": {\"type\": \"string\"},\n        \"currentPrice\": {\"type\": \"string\"},\n        \"trend\": {\"type\": \"string\"}\n      }\n    },\n    \"newsHighlights\": {\"type\": \"array\", \"items\": {\"type\": \"string\"}},\n    \"overallOutlook\": {\"type\": \"string\"}\n  }\n}",
+                    "onError": ""
+                },
+                "maxFeedbackLoops": 0
+            },
+            "measured": {
+                "width": 160,
+                "height": 40
+            },
+            "selected": false,
+            "dragging": false
+        },
+        {
+            "id": "rpt007ab-bb88-4a77-5ccc-ddd777888999",
+            "type": "data-flow-spy",
+            "position": {
+                "x": 800,
+                "y": 90
+            },
+            "data": {
+                "title": "Data Flow Spy"
+            },
+            "measured": {
+                "width": 120,
+                "height": 40
+            },
+            "selected": false,
+            "dragging": false
+        }
+    ],
+    "edges": [
+        {
+            "type": "smoothstep",
+            "animated": false,
+            "source": "rpt001aa-bb22-4a11-9ccc-ddd111222333",
+            "sourceHandle": "timer-trigger",
+            "target": "rpt002bc-cc33-4b22-0ddd-eee222333444",
+            "targetHandle": "timer-trigger",
+            "id": "edge-timer-stock-report"
+        },
+        {
+            "type": "smoothstep",
+            "animated": false,
+            "source": "rpt001aa-bb22-4a11-9ccc-ddd111222333",
+            "sourceHandle": "timer-trigger",
+            "target": "rpt003cd-dd44-4c33-1eee-fff333444555",
+            "targetHandle": "timer-trigger",
+            "id": "edge-timer-news-report"
+        },
+        {
+            "type": "smoothstep",
+            "animated": false,
+            "source": "rpt002bc-cc33-4b22-0ddd-eee222333444",
+            "sourceHandle": "right-source",
+            "target": "rpt004de-ee55-4d44-2fff-aaa444555666",
+            "targetHandle": "left-target",
+            "id": "edge-stock-agg-report"
+        },
+        {
+            "type": "smoothstep",
+            "animated": false,
+            "source": "rpt003cd-dd44-4c33-1eee-fff333444555",
+            "sourceHandle": "right-source",
+            "target": "rpt004de-ee55-4d44-2fff-aaa444555666",
+            "targetHandle": "left-target",
+            "id": "edge-news-agg-report"
+        },
+        {
+            "type": "smoothstep",
+            "animated": false,
+            "source": "rpt004de-ee55-4d44-2fff-aaa444555666",
+            "sourceHandle": "right-source",
+            "target": "rpt005ef-ff66-4e55-3aaa-bbb555666777",
+            "targetHandle": "left-target",
+            "id": "edge-agg-reformat-report"
+        },
+        {
+            "type": "smoothstep",
+            "animated": false,
+            "source": "rpt005ef-ff66-4e55-3aaa-bbb555666777",
+            "sourceHandle": "right-source",
+            "target": "rpt006fa-aa77-4f66-4bbb-ccc666777888",
+            "targetHandle": "left-target",
+            "id": "edge-reformat-llm-report"
+        },
+        {
+            "type": "smoothstep",
+            "animated": false,
+            "source": "rpt006fa-aa77-4f66-4bbb-ccc666777888",
+            "sourceHandle": "right-source",
+            "target": "rpt007ab-bb88-4a77-5ccc-ddd777888999",
+            "targetHandle": "left-target",
+            "id": "edge-llm-spy-report"
+        }
+    ]
+}
