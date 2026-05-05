@@ -33,10 +33,8 @@ import {
     NavArrowUp,
     Brain,
     Star,
-    Play,
     LightBulb,
     Trash,
-    Check,
 } from 'iconoir-react';
 import {v4 as uuidv4} from 'uuid';
 import './AICopilotPanel.scss';
@@ -51,13 +49,6 @@ type Message = {
     role: 'user' | 'assistant' | 'system';
     content: string;
     timestamp: Date;
-    actions?: WorkflowAction[];
-};
-
-type WorkflowAction = {
-    type: 'build_workflow' | 'suggest_modification';
-    data: WorkflowPlan | ModificationPlan;
-    label: string;
 };
 
 type WorkflowPlan = {
@@ -96,68 +87,85 @@ interface AICopilotPanelProps {
     onAddNodes?: (nodes: AppNode[]) => void;
 }
 
-const SYSTEM_PROMPT_BASE = `You are an AI workflow assistant for Agentic Signal, a visual workflow automation platform.
+const SYSTEM_PROMPT_BASE = `You are an AI workflow automation agent for Agentic Signal. Your job is to DIRECTLY build and modify workflows on the canvas based on user requests. DO NOT ask for permission — apply changes immediately.
 
-YOUR CAPABILITIES:
-1. BUILD - Create new workflows from scratch based on user requests
-2. MODIFY - Suggest improvements to existing workflows (requires user permission)
-3. EXPLAIN - Help users understand how nodes work
-4. TROUBLESHOOT - Debug workflow issues
+CAPABILITIES:
+1. BUILD - Build a complete workflow from described requirements
+2. MODIFY - Add/remove nodes and edges on the existing canvas
+3. EXPLAIN/TROUBLESHOOT - Help understand and debug workflows
 
-IMPORTANT RULES:
-- ALWAYS ask permission before modifying or adding nodes to existing workflows
-- Explain WHY each change is needed before applying
-- Sensitive data (API keys, tokens, passwords) is automatically masked in the context
-- Be concise but informative in your responses
+CRITICAL RULES:
+- ALWAYS respond with a valid JSON build_workflow or suggest_modification action when the user requests workflow changes
+- DO NOT ask "would you like me to..." — just DO it
+- DO NOT say "shall I proceed?" or "let me know if you want me to build this" — BUILD IT
+- If the canvas is empty and user asks to build something, use build_workflow
+- If the canvas has nodes and user asks to add/change, use suggest_modification
+- ALL edges MUST include both "sourceHandle": "right-source" AND "targetHandle": "left-target" unless connecting to a timer-trigger or tools-target
+- Position new nodes intelligently — space them at least 340px apart horizontally and 152px vertically
+- Use EXACT node type strings from the list below
+- Every node needs an id, type, position (x,y), and data object
+- Sensitive data is automatically masked
 
-NODE TYPES AVAILABLE:
-- data-source: Input node for static data (JSON or Markdown text)
+AVAILABLE NODE TYPES (use these exact strings):
+- data-source: Static data input (JSON or Markdown text)
 - get-data: HTTP GET requests to external REST APIs
 - http-data: Fetch rendered web pages using headless browser
-- timer: Trigger workflow at intervals (in seconds)
-- llm-process: Send text to AI (Ollama) for processing with optional tools
-- tool: Call external functions (stock-analysis, weather, search, calculations)
-- json-reformatter: Transform and format JSON data using JSONata expressions
-- data-validation: Validate data against JSON schemas
-- stock-analysis: Get stock market data with technical indicators
-- async-data-aggregator: Combine data from multiple sources (waits for all inputs)
-- chart: Visualize data as interactive charts (line, bar, pie)
-- data-flow-spy: Debug workflow by viewing intermediate data
+- timer: Trigger workflow at intervals or on schedule. Data must include \`interval\` (ms), \`intervalMode\` ("interval"), \`runOnce\`
+- llm-process: Send text to AI (Ollama) for processing. Data should include \`systemPrompt\`, \`promptPrefix\`, \`promptSuffix\`
+- tool: External function wrapper. Data must include \`toolSubtype\` (e.g. "brave-search", "duckduckgo-search", "date-time-now", "sort", "max", "min", "csv-to-array", "stock-analysis-tool", "fetch-weather-data")
+- json-reformatter: Transform JSON using JSONata expressions. Data should include \`expression\`
+- data-validation: Validate data against JSON schemas. Data should include \`schema\`
+- stock-analysis: Technical stock indicators. Data should include \`symbol\`
+- async-data-aggregator: Combine multiple data sources. Accepts multiple inputs
+- chart: Visualize data as charts. Must be terminal sink node
+- data-flow-spy: Debug node to inspect data. Terminal sink node
 
-RESPONSE FORMAT FOR BUILDING WORKFLOWS:
+RESPONSE FORMAT — build_workflow (use when canvas is empty or user wants a completely new workflow):
 \`\`\`json
 {
   "action": "build_workflow",
   "plan": {
     "nodes": [
-      {"id": "node1", "type": "timer", "position": {"x": 100, "y": 200}, "data": {"interval": 3600, "title": "Hourly Trigger"}},
-      {"id": "node2", "type": "stock-analysis", "position": {"x": 400, "y": 200}, "data": {"symbol": "AAPL"}}
+      {"id": "node1", "type": "timer", "position": {"x": 100, "y": 100}, "data": {"interval": 300000, "title": "5-Minute Timer"}},
+      {"id": "node2", "type": "get-data", "position": {"x": 440, "y": 100}, "data": {"url": "https://api.example.com/data", "dataType": "json", "title": "Fetch Data"}},
+      {"id": "node3", "type": "chart", "position": {"x": 780, "y": 100}, "data": {"chartType": "line", "title": "Data Chart"}}
     ],
     "edges": [
-      {"id": "edge1", "source": "node1", "target": "node2"}
+      {"id": "edge1", "source": "node1", "target": "node2", "sourceHandle": "timer-trigger", "targetHandle": "timer-trigger"},
+      {"id": "edge2", "source": "node2", "target": "node3", "sourceHandle": "right-source", "targetHandle": "left-target"}
     ]
   },
-  "explanation": "This workflow triggers hourly to fetch AAPL stock prices"
+  "explanation": "Built a workflow that fetches data every 5 minutes and displays it as a chart."
 }
 \`\`\`
 
-RESPONSE FORMAT FOR SUGGESTING MODIFICATIONS:
+RESPONSE FORMAT — suggest_modification (use when canvas has existing nodes and user wants to add/remove/modify):
 \`\`\`json
 {
   "action": "suggest_modification",
-  "explanation": "I recommend adding a Timer node to trigger the workflow every hour. This will automate the data fetching process.",
+  "explanation": "Adding a timer to automate the data fetch every 15 minutes.",
   "changes": {
     "addNodes": [
-      {"id": "new-timer", "type": "timer", "position": {"x": 50, "y": 100}, "data": {"interval": 3600, "title": "Hourly Timer"}}
+      {"id": "new-timer", "type": "timer", "position": {"x": 100, "y": 50}, "data": {"interval": 900000, "title": "15-Minute Timer"}}
     ],
+    "removeNodeIds": [],
     "addEdges": [
-      {"id": "new-edge", "source": "new-timer", "target": "existing-node-id"}
-    ]
+      {"id": "new-edge", "source": "new-timer", "target": "EXISTING_NODE_ID", "sourceHandle": "timer-trigger", "targetHandle": "timer-trigger"}
+    ],
+    "removeEdgeIds": []
   }
 }
 \`\`\`
 
-For general questions or help, respond naturally without using the JSON format.`;
+EDGE/CONNECTION RULES (CRITICAL):
+- Timer → Source Node (get-data, data-source, http-data): sourceHandle="timer-trigger", targetHandle="timer-trigger"
+- Timer → LLM Process: sourceHandle="timer-trigger", targetHandle="timer-trigger"
+- Source/Processor → Processor/Sink (standard data flow): sourceHandle="right-source", targetHandle="left-target"
+- Tool → LLM Process: sourceHandle="right-source", targetHandle="tools-target"
+- A chart or data-flow-spy MUST be the last node in any chain — they have no output
+- async-data-aggregator can accept connections from multiple sources
+
+For general questions or help, respond naturally without JSON.`;
 
 export function AICopilotPanel ({nodes, edges, onAddNodes: _onAddNodes}: AICopilotPanelProps) {
     const [open, setOpen] = useState(false);
@@ -165,7 +173,7 @@ export function AICopilotPanel ({nodes, edges, onAddNodes: _onAddNodes}: AICopil
         {
             id: uuidv4(),
             role: 'assistant',
-            content: "Hi! I'm your AI workflow assistant. I can see your current workflow on the canvas. Describe what you'd like to do, and I'll help you build or modify your workflow.",
+            content: "Hi! I'm your AI workflow builder. Describe the workflow you want, and I'll build it directly on your canvas — no confirmation needed. What would you like to create?",
             timestamp: new Date(),
         }
     ]);
@@ -178,22 +186,18 @@ export function AICopilotPanel ({nodes, edges, onAddNodes: _onAddNodes}: AICopil
     const [selectedModel, setSelectedModel] = useState<string>('');
     const [isLoadingModels, setIsLoadingModels] = useState(false);
     const [clearDialogOpen, setClearDialogOpen] = useState(false);
-    const [buildStatus, setBuildStatus] = useState<'idle' | 'building' | 'done' | 'error'>('idle');
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const ollamaService = OllamaService.getInstance();
 
     useEffect(() => {
-        if (open && !contextLoaded) {
+        if (open) {
             const context = generateWorkflowContext(nodes, edges);
-
             setWorkflowContext(context);
             setContextLoaded(true);
-        }
-
-        if (!open) {
+        } else {
             setContextLoaded(false);
         }
-    }, [open, contextLoaded, nodes, edges]);
+    }, [open, nodes, edges]);
 
     useEffect(() => {
         if (open) {
@@ -279,28 +283,6 @@ export function AICopilotPanel ({nodes, edges, onAddNodes: _onAddNodes}: AICopil
         return null;
     };
 
-    const validateNodeStructure = (plan: WorkflowPlan): {valid: boolean; error?: string} => {
-        if (!plan || typeof plan !== 'object') {
-            return {valid: false, error: 'Invalid workflow plan'};
-        }
-
-        if (!Array.isArray(plan.nodes) || plan.nodes.length === 0) {
-            return {valid: false, error: 'No nodes in workflow plan'};
-        }
-
-        for (const node of plan.nodes) {
-            if (!node.type) {
-                return {valid: false, error: `Node ${node.id || 'unknown'} is missing a type`};
-            }
-
-            if (!node.position) {
-                return {valid: false, error: `Node ${node.id || 'unknown'} is missing position`};
-            }
-        }
-
-        return {valid: true};
-    };
-
     const handleSend = async () => {
         if (!input.trim() || loading) return;
 
@@ -313,9 +295,6 @@ export function AICopilotPanel ({nodes, edges, onAddNodes: _onAddNodes}: AICopil
             }]);
 
             return;
-        }
-
-        setBuildStatus('idle');
 
         const userMessage: Message = {
             id: uuidv4(),
@@ -354,23 +333,19 @@ export function AICopilotPanel ({nodes, edges, onAddNodes: _onAddNodes}: AICopil
                     if (parsed.action === 'build_workflow' && parsed.plan) {
                         const nodeCount = (parsed.plan.nodes || []).length;
                         const edgeCount = (parsed.plan.edges || []).length;
-                        const label = `Build Workflow (${nodeCount} node${nodeCount !== 1 ? 's' : ''}${edgeCount > 0 ? `, ${edgeCount} edge${edgeCount !== 1 ? 's' : ''}` : ''})`;
 
                         const assistantMessage: Message = {
                             id: uuidv4(),
                             role: 'assistant',
-                            content: parsed.explanation || 'Here is a workflow I built for you:',
+                            content: parsed.explanation || `Building a workflow with ${nodeCount} node(s)...`,
                             timestamp: new Date(),
-                            actions: [
-                                {
-                                    type: 'build_workflow',
-                                    data: parsed.plan as WorkflowPlan,
-                                    label
-                                }
-                            ]
                         };
 
                         setMessages(prev => [...prev, assistantMessage]);
+
+                        // Auto-build immediately
+                        window.dispatchEvent(new CustomEvent('ai-build-workflow', {detail: parsed.plan}));
+                        setTimeout(() => setOpen(false), 300);
                     } else if (parsed.action === 'suggest_modification') {
                         const preview = generateModificationPreview(
                             {explanation: parsed.explanation || '', changes: parsed.changes || {}},
@@ -381,16 +356,17 @@ export function AICopilotPanel ({nodes, edges, onAddNodes: _onAddNodes}: AICopil
                             role: 'assistant',
                             content: preview,
                             timestamp: new Date(),
-                            actions: [
-                                {
-                                    type: 'suggest_modification',
-                                    data: parsed as unknown as ModificationPlan,
-                                    label: 'Apply Changes'
-                                }
-                            ]
                         };
 
                         setMessages(prev => [...prev, assistantMessage]);
+
+                        // Auto-apply modifications immediately
+                        const plan: ModificationPlan = {
+                            explanation: parsed.explanation || '',
+                            changes: parsed.changes || {}
+                        };
+                        window.dispatchEvent(new CustomEvent('ai-modify-workflow', {detail: plan}));
+                        setTimeout(() => setOpen(false), 300);
                     } else {
                         const assistantMessage: Message = {
                             id: uuidv4(),
@@ -435,64 +411,6 @@ export function AICopilotPanel ({nodes, edges, onAddNodes: _onAddNodes}: AICopil
         setLoading(false);
     };
 
-    const handleBuildWorkflow = (plan: WorkflowPlan) => {
-        const validation = validateNodeStructure(plan);
-
-        if (!validation.valid) {
-            setMessages(prev => [...prev, {
-                id: uuidv4(),
-                role: 'assistant',
-                content: `Cannot build: ${validation.error}`,
-                timestamp: new Date(),
-            }]);
-
-            return;
-        }
-
-        setBuildStatus('building');
-
-        // Add a status message showing what will be built
-        const nodeList = plan.nodes.map(n => `• ${n.data?.title || n.type}`).join('\n');
-        const edgeCount = (plan.edges || []).length;
-
-        setMessages(prev => [...prev, {
-            id: uuidv4(),
-            role: 'assistant',
-            content: `Building workflow with ${plan.nodes.length} node${plan.nodes.length !== 1 ? 's' : ''}:\n${nodeList}${edgeCount > 0 ? `\n\n${edgeCount} connection${edgeCount !== 1 ? 's' : ''} included` : ''}`,
-            timestamp: new Date(),
-        }]);
-
-        const event = new CustomEvent('ai-build-workflow', {detail: plan});
-
-        window.dispatchEvent(event);
-
-        // Close after a brief delay so the event can be processed
-        setTimeout(() => {
-            setBuildStatus('done');
-            setOpen(false);
-        }, 300);
-    };
-
-    const handleSuggestModification = (plan: ModificationPlan) => {
-        const event = new CustomEvent('ai-modify-workflow', {detail: plan});
-
-        window.dispatchEvent(event);
-
-        setTimeout(() => {
-            setOpen(false);
-        }, 300);
-    };
-
-    const dismissAction = (messageId: string, actionIndex: number) => {
-        setMessages(prev => prev.map(m => {
-            if (m.id !== messageId) return m;
-
-            const updatedActions = (m.actions || []).filter((_, i) => i !== actionIndex);
-
-            return {...m, actions: updatedActions};
-        }));
-    };
-
     const handleOpenClearDialog = () => setClearDialogOpen(true);
     const handleCloseClearDialog = () => setClearDialogOpen(false);
 
@@ -500,7 +418,7 @@ export function AICopilotPanel ({nodes, edges, onAddNodes: _onAddNodes}: AICopil
         setMessages([{
             id: uuidv4(),
             role: 'assistant',
-            content: "Hi! I'm your AI workflow assistant. I can see your current workflow on the canvas. Describe what you'd like to do, and I'll help you build or modify your workflow.",
+            content: "Hi! I'm your AI workflow builder. Describe the workflow you want, and I'll build it directly on your canvas — no confirmation needed. What would you like to create?",
             timestamp: new Date(),
         }]);
         setInput('');
@@ -595,45 +513,6 @@ export function AICopilotPanel ({nodes, edges, onAddNodes: _onAddNodes}: AICopil
                                     <Typography className="message-text">
                                         {message.content}
                                     </Typography>
-
-                                    {message.actions && message.actions.length > 0 && (
-                                        <Box className="message-actions">
-                                            {message.actions.map((action, idx) => (
-                                                <Box key={idx} className="action-wrapper">
-                                                    {action.type === 'suggest_modification' && (
-                                                        <Box className="confirm-actions">
-                                                            <IconButton
-                                                                onClick={() => handleSuggestModification(action.data as ModificationPlan)}
-                                                                className="accept-button"
-                                                                title="Accept changes"
-                                                            >
-                                                                <Check />
-                                                            </IconButton>
-                                                            <IconButton
-                                                                onClick={() => dismissAction(message.id, idx)}
-                                                                className="decline-button"
-                                                                title="Decline changes"
-                                                            >
-                                                                <Xmark />
-                                                            </IconButton>
-                                                        </Box>
-                                                    )}
-                                                    {action.type === 'build_workflow' && (
-                                                        <Button
-                                                            variant="contained"
-                                                            color="primary"
-                                                            startIcon={buildStatus === 'building' ? <CircularProgress size={16} color="inherit" /> : <Play />}
-                                                            onClick={() => handleBuildWorkflow(action.data as WorkflowPlan)}
-                                                            className="action-button build"
-                                                            disabled={buildStatus === 'building'}
-                                                        >
-                                                            {buildStatus === 'building' ? 'Building...' : action.label}
-                                                        </Button>
-                                                    )}
-                                                </Box>
-                                            ))}
-                                        </Box>
-                                    )}
                                 </Box>
                                 {message.role === 'user' && (
                                     <Avatar className="message-avatar user">U</Avatar>

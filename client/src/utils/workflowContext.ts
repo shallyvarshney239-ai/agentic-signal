@@ -206,8 +206,8 @@ ${edgeList}
 
 IMPORTANT CONTEXT:
 • This shows the user's current workflow setup
-• You can suggest modifications that integrate with existing nodes
-• Changes require user permission before being applied
+• You can integrate new nodes with existing ones using suggest_modification
+• Use exact node IDs from the existing canvas when creating edges to existing nodes
 • Sensitive data (API keys, tokens) is automatically masked
 
 ═══════════════════════════════════════════════════

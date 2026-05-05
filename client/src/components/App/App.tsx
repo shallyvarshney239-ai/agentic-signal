@@ -32,6 +32,7 @@ import {CustomEdge} from '../edges/CustomEdge';
 import {ConnectionPreview} from '../ConnectionPreview/ConnectionPreview';
 import {ConnectionToastContainer, useToast} from '../ConnectionToast/ConnectionToast';
 import {EdgeContextMenu} from '../EdgeContextMenu/EdgeContextMenu';
+import {getEdgeTypeFromHandles} from '../../types/edgeTypes';
 
 const edgeTypes = {
     custom: CustomEdge,
@@ -91,7 +92,7 @@ function remapNodeAndEdgeIds (nodes: any[], edges: any[]) {
     const remappedEdges = edges.map((edge: any) => {
         const newSource = idMap.get(edge.source) ?? edge.source;
         const newTarget = idMap.get(edge.target) ?? edge.target;
-        const newId = `xy-edge__${newSource}-${edge.sourceHandle ?? ''}-${newTarget}-${edge.targetHandle ?? ''}`;
+        const newId = `edge-${newSource}-${edge.sourceHandle ?? ''}-${newTarget}-${edge.targetHandle ?? ''}`;
 
         return {
             ...edge,
@@ -216,56 +217,132 @@ function AppFlow () {
         const handleAiModifyWorkflow = (event: CustomEvent) => {
             const detail = event.detail;
 
-            // Normalize: handle different event formats
-            const nodeId = detail?.nodeId;
-            const modification = detail?.modification || detail;
-
-            if (!nodeId || !modification) {
-                console.error('[AI Modify Workflow] Missing nodeId or modification:', detail);
-                enqueueSnackbar('Failed to modify workflow: invalid data received', {variant: 'error'});
-
+            if (!detail || (!detail.changes && !detail.addNodes)) {
+                console.error('[AI Modify Workflow] Missing changes in event data:', detail);
+                enqueueSnackbar('Failed to modify workflow: invalid modification data', {variant: 'error'});
                 return;
             }
 
-            setNodes(prevNodes => {
-                const nodeExists = prevNodes.some(n => n.id === nodeId);
+            const changes = detail.changes || detail;
 
-                if (!nodeExists) {
-                    enqueueSnackbar(`Node ${nodeId} not found on canvas`, {variant: 'warning'});
-
-                    return prevNodes;
+            try {
+                // 1. Handle node removals first (so edges pointing to them can be cleaned up)
+                if (changes.removeNodeIds?.length) {
+                    setNodes(prevNodes =>
+                        prevNodes.filter(n => !changes.removeNodeIds.includes(n.id))
+                    );
+                    setEdges(prevEdges =>
+                        prevEdges.filter(e =>
+                            !changes.removeNodeIds.includes(e.source) &&
+                            !changes.removeNodeIds.includes(e.target)
+                        )
+                    );
                 }
 
-                return prevNodes.map(node => {
-                    if (node.id === nodeId) {
-                        const nodeData: Record<string, any> = {...node.data};
+                // 2. Handle edge removals
+                if (changes.removeEdgeIds?.length) {
+                    setEdges(prevEdges =>
+                        prevEdges.filter(e => !changes.removeEdgeIds.includes(e.id))
+                    );
+                }
 
-                        for (const [key, value] of Object.entries(modification)) {
-                            if (key.startsWith('.')) {
-                                const pathParts = key.slice(1).split('.');
-                                let target: any = nodeData;
+                // 3. Handle node additions
+                if (changes.addNodes?.length) {
+                    // Find positioning for new nodes — place below existing ones
+                    setNodes(prevNodes => {
+                        let maxY = 0;
+                        let minX = Infinity;
 
-                                for (let i = 0; i < pathParts.length - 1; i++) {
-                                    if (!target || typeof target !== 'object') return node;
-
-                                    target = target[pathParts[i]];
-                                }
-
-                                if (target && typeof target === 'object') {
-                                    target[pathParts[pathParts.length - 1]] = value;
-                                }
-                            } else {
-                                nodeData[key] = value;
-                            }
+                        for (const node of prevNodes) {
+                            const y = node.position.y + (node.measured?.height ?? 80);
+                            const x = node.position.x;
+                            if (y > maxY) maxY = y;
+                            if (x < minX) minX = x;
                         }
 
-                        return {...node, data: nodeData} as AppNode;
-                    }
+                        const yOffset = maxY > 0 ? maxY + 80 : 0;
+                        const xBase = minX < Infinity ? minX : 100;
 
-                    return node;
-                }) as AppNode[];
-            });
-            enqueueSnackbar('Workflow modified by AI', {variant: 'info'});
+                        const validNodes = changes.addNodes!.map((node: any, index: number) => {
+                            const descriptor = nodeRegistry.find(d => d.type === node.type);
+
+                            if (!descriptor) {
+                                console.warn('[AI Modify] Unknown node type:', node.type, 'Skipping');
+                                return null;
+                            }
+
+                            return {
+                                id: node.id || getId(),
+                                type: node.type,
+                                position: {
+                                    x: node.position?.x ?? xBase + index * 50,
+                                    y: (node.position?.y ?? 0) + yOffset
+                                },
+                                data: {
+                                    ...descriptor.defaultData,
+                                    ...node.data,
+                                    title: node.data?.title || descriptor.title,
+                                }
+                            };
+                        }).filter(Boolean);
+
+                        if (validNodes.length === 0) return prevNodes;
+
+                        return [...prevNodes, ...validNodes];
+                    });
+                }
+
+                // 4. Handle edge additions
+                if (changes.addEdges?.length) {
+                    setEdges(prevEdges => {
+                        const newEdges: Edge[] = [];
+
+                        for (const edge of changes.addEdges) {
+                            if (!edge.source || !edge.target) continue;
+
+                            const sourceHandle = edge.sourceHandle || 'right-source';
+                            const targetHandle = edge.targetHandle || 'left-target';
+
+                            const edgeType = getEdgeTypeFromHandles(sourceHandle, targetHandle);
+
+                            const alreadyExists = prevEdges.some(
+                                e => e.source === edge.source && e.target === edge.target && e.targetHandle === targetHandle
+                            );
+                            if (alreadyExists) continue;
+
+                            newEdges.push({
+                                id: edge.id || getId(),
+                                source: edge.source,
+                                target: edge.target,
+                                sourceHandle,
+                                targetHandle,
+                                type: 'custom',
+                                className: `edge-type-${edgeType}`,
+                                data: {edgeType},
+                                animated: false,
+                            });
+                        }
+
+                        if (newEdges.length === 0) return prevEdges;
+                        return [...prevEdges, ...newEdges];
+                    });
+                }
+
+                const summary = [
+                    changes.addNodes?.length ? `${changes.addNodes.length} node(s) added` : '',
+                    changes.removeNodeIds?.length ? `${changes.removeNodeIds.length} node(s) removed` : '',
+                    changes.addEdges?.length ? `${changes.addEdges.length} edge(s) added` : '',
+                    changes.removeEdgeIds?.length ? `${changes.removeEdgeIds.length} edge(s) removed` : '',
+                ].filter(Boolean).join(', ');
+
+                enqueueSnackbar(`Workflow modified: ${summary}`, {variant: 'success'});
+            } catch (err) {
+                console.error('[AI Modify Workflow] Modification failed:', err);
+                enqueueSnackbar(
+                    `Failed to modify workflow: ${err instanceof Error ? err.message : 'Unknown error'}`,
+                    {variant: 'error'}
+                );
+            }
         };
 
         window.addEventListener('ai-build-workflow', handleAiBuildWorkflow as EventListener);
@@ -333,19 +410,23 @@ function AppFlow () {
 
     const handleAddNodes = useCallback((newNodes: any[]) => {
         let maxY = 0;
+        let minX = Infinity;
 
         for (const node of nodes) {
             const y = node.position.y + (node.measured?.height ?? 40);
+            const x = node.position.x;
 
             if (y > maxY) maxY = y;
+            if (x < minX) minX = x;
         }
 
         const yOffset = maxY > 0 ? maxY + 100 : 0;
+        const xBase = minX < Infinity ? minX : 100;
 
         const positionedNodes = newNodes.map((node, index) => ({
             ...node,
             position: {
-                x: node.position?.x ?? 100 + index * 50,
+                x: node.position?.x ?? xBase + index * 50,
                 y: (node.position?.y ?? 0) + yOffset
             }
         }));

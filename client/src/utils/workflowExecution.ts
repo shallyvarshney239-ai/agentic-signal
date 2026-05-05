@@ -32,12 +32,12 @@ export function detectCycle (edges: Edge[]): {hasCycle: boolean; cycleNodes: str
     const BLACK = 2;
     const color = new Map<string, number>();
     const parent = new Map<string, string | null>();
-
-    allNodes.forEach((node) => color.set(node, WHITE));
-    parent.forEach((_, node) => parent.set(node, null));
-
-    let cycleStart: string | null = null;
     const cyclePath: string[] = [];
+
+    allNodes.forEach((node) => {
+        color.set(node, WHITE);
+        parent.set(node, null);
+    });
 
     function dfs (node: string): boolean {
         color.set(node, GRAY);
@@ -46,9 +46,17 @@ export function detectCycle (edges: Edge[]): {hasCycle: boolean; cycleNodes: str
 
         for (const neighbor of neighbors) {
             if (color.get(neighbor) === GRAY) {
-                cycleStart = neighbor;
                 cyclePath.push(neighbor);
-                cyclePath.push(node);
+
+                let current = node;
+
+                while (current !== neighbor) {
+                    cyclePath.push(current);
+                    current = parent.get(current)!;
+                }
+
+                cyclePath.push(neighbor);
+                cyclePath.reverse();
 
                 return true;
             }
@@ -57,10 +65,6 @@ export function detectCycle (edges: Edge[]): {hasCycle: boolean; cycleNodes: str
                 parent.set(neighbor, node);
 
                 if (dfs(neighbor)) {
-                    if (cycleStart && cyclePath[cyclePath.length - 1] !== cycleStart) {
-                        cyclePath.push(node);
-                    }
-
                     return true;
                 }
             }
@@ -76,7 +80,7 @@ export function detectCycle (edges: Edge[]): {hasCycle: boolean; cycleNodes: str
             if (dfs(node)) {
                 return {
                     hasCycle: true,
-                    cycleNodes: cyclePath.reverse()
+                    cycleNodes: cyclePath
                 };
             }
         }

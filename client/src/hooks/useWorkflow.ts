@@ -275,6 +275,14 @@ export function useWorkflow () {
     }, [setNodes]);
 
     const handleNodeResultUpdate = useCallback((nodeId: string, input: any) => {
+        const prevResult = previousInputRef.current.get(nodeId);
+
+        if (prevResult !== undefined && JSON.stringify(prevResult) === JSON.stringify(input)) {
+            return;
+        }
+
+        previousInputRef.current.set(nodeId, input);
+
         setResults((prev) => new Map(prev.set(nodeId, input)));
 
         setNodes((existingNodes) =>
@@ -296,7 +304,19 @@ export function useWorkflow () {
                         return updateNodeData(node, {input: rest}, nodeAssertions);
                     }
 
+                    const currentVal = currentInputs[nodeId];
+
+                    if (currentVal !== undefined && JSON.stringify(currentVal) === JSON.stringify(input)) {
+                        return node;
+                    }
+
                     return updateNodeData(node, {input: {...currentInputs, [nodeId]: input}}, nodeAssertions);
+                }
+
+                const currentInput = node.data.input;
+
+                if (currentInput !== undefined && JSON.stringify(currentInput) === JSON.stringify(input)) {
+                    return node;
                 }
 
                 return updateNodeData(node, {input, feedback: undefined}, nodeAssertions);
