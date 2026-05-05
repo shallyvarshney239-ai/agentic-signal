@@ -1,5 +1,5 @@
 /************************************************************************
- *    Copyright (C) 2025 Code Forge Temple                              *
+ *    Copyright (C) 2025 shally                              *
  *    This file is part of agentic-signal project                       *
  *    See the LICENSE file in the project root for license details.     *
  ************************************************************************/
@@ -10,7 +10,7 @@ import type * as Preset from '@docusaurus/preset-classic';
 
 const TITLE = 'Agentic Signal';
 const TAGLINE = 'Visual AI Workflow Automation Platform with Local Agent Intelligence';
-const GITHUB_DEPLOYMENT = "https://code-forge-temple.github.io/agentic-signal";
+const GITHUB_DEPLOYMENT = "https://crazy-shally.github.io/agentic-signal";
 
 
 const config: Config = {
@@ -25,7 +25,7 @@ const config: Config = {
     url: 'https://agentic-signal.com',
     baseUrl: '/',
 
-    organizationName: 'code-forge-temple',
+    organizationName: 'crazy-shally',
     projectName: 'agentic-signal',
 
     deploymentBranch: 'gh-pages',
@@ -70,7 +70,7 @@ const config: Config = {
                         });
 
                         items.push({
-                            url: 'https://github.com/code-forge-temple/agentic-signal',
+                            url: 'https://github.com/crazy-shally/agentic-signal',
                             changefreq: 'weekly',
                             priority: 0.7,
                             lastmod: new Date().toISOString(),
@@ -122,7 +122,7 @@ const config: Config = {
                     target: '_self',
                 },
                 {
-                    href: 'https://github.com/code-forge-temple/agentic-signal',
+                    href: 'https://github.com/crazy-shally/agentic-signal',
                     label: 'GitHub',
                     position: 'right',
                 },
@@ -153,11 +153,11 @@ const config: Config = {
                     items: [
                         {
                             label: 'GitHub Discussions',
-                            href: 'https://github.com/code-forge-temple/agentic-signal/discussions',
+                            href: 'https://github.com/crazy-shally/agentic-signal/discussions',
                         },
                         {
                             label: 'GitHub Issues',
-                            href: 'https://github.com/code-forge-temple/agentic-signal/issues',
+                            href: 'https://github.com/crazy-shally/agentic-signal/issues',
                         },
                         {
                             label: 'Reddit Community',
@@ -174,12 +174,12 @@ const config: Config = {
                     items: [
                         {
                             label: 'GitHub',
-                            href: 'https://github.com/code-forge-temple/agentic-signal',
+                            href: 'https://github.com/crazy-shally/agentic-signal',
                         },
                     ],
                 },
             ],
-            copyright: `Copyright © ${new Date().getFullYear()} Code Forge Temple. Built with Docusaurus.`,
+            copyright: `Copyright © ${new Date().getFullYear()} shally. Built with Docusaurus.`,
         },
         prism: {
             theme: prismThemes.github,

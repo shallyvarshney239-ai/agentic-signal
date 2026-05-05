@@ -6,7 +6,7 @@ const target = "C:/Users/Shubh Varshney/Downloads/agentic-signal/client/src/comp
 
 const content = [
 '/************************************************************************',
-' *    Copyright (C) 2025 Code Forge Temple                              *',
+' *    Copyright (C) 2025 shally                              *',
 ' *    This file is part of agentic-signal project                       *',
 ' *    See the LICENSE file in the project root for license details.     *',
 ' ************************************************************************/',

@@ -4,7 +4,7 @@ const path = require("path");
 const dir = path.join("C:/Users/Shubh Varshney/Downloads/agentic-signal/client/src/components", "MetricsPanel");
 fs.mkdirSync(dir, { recursive: true });
 
-const mp = '/* Copyright 2025 Code Forge Temple */\n' +
+const mp = '/* Copyright 2025 shally */\n' +
 'import { Box, Button, Paper, Typography } from "@mui/material";\n' +
 'import { metricsStore } from "../../services/metricsStore";\n' +
 'import { OllamaService } from "../../services/ollamaService";\n' +

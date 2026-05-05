@@ -1,5 +1,5 @@
 /************************************************************************
- *    Copyright (C) 2025 Code Forge Temple                              *
+ *    Copyright (C) 2025 shally                              *
  *    This file is part of agentic-signal project                       *
  *    See the LICENSE file in the project root for license details.     *
  ************************************************************************/
@@ -7,13 +7,14 @@
 import {type NodeProps} from "@xyflow/react";
 import {assertIsChartNodeData} from "./types/workflow";
 import {useMemo, useState} from "react";
-import {Line} from "react-chartjs-2";
+import {Line, Bar} from "react-chartjs-2";
 import {
     Chart as ChartJS,
     CategoryScale,
     LinearScale,
     PointElement,
     LineElement,
+    BarElement,
     Title,
     Tooltip,
     Legend
@@ -34,7 +35,7 @@ import {FieldsetGroup} from "../../FieldsetGroup";
 import {formatFeedbackMessage} from "../StockAnalysisNode/utils";
 
 
-ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
+ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, BarElement, Title, Tooltip, Legend);
 
 function randomColor () {
     const r = Math.floor(Math.random() * 200 + 30);
@@ -55,6 +56,7 @@ export function ChartNode ({data, id}: NodeProps<AppNode>) {
     const [openSettings, setOpenSettings] = useState(false);
     const [isRunning, setIsRunning] = useState(false);
     const {input, title, onResultUpdate, onFeedbackSend} = data;
+    const chartType = (data as any).chartType || "line";
 
     useAutoRunOnInputChange({
         clearError: () => { setError(null) },
@@ -204,23 +206,43 @@ id={id}
             >
                 {lineData ? (
                     <div style={{width: "100%", height: "100%", minHeight: 0}}>
-                        <Line
-                            data={lineData}
-                            options={{
-                                responsive: true,
-                                maintainAspectRatio: false,
-                                plugins: {
-                                    legend: {
-                                        display: true
-                                    },
-                                    title: {
-                                        display: true,
-                                        ...('title' in lineData ? {text: lineData.title} : {}),
+                        {chartType === "bar" || chartType === "mixed" ? (
+                            <Bar
+                                data={lineData}
+                                options={{
+                                    responsive: true,
+                                    maintainAspectRatio: false,
+                                    plugins: {
+                                        legend: {
+                                            display: true
+                                        },
+                                        title: {
+                                            display: true,
+                                            ...('title' in lineData ? {text: lineData.title} : {}),
+                                        }
                                     }
-                                }
-                            }}
-                            style={{width: "100%", height: "100%"}}
-                        />
+                                }}
+                                style={{width: "100%", height: "100%"}}
+                            />
+                        ) : (
+                            <Line
+                                data={lineData}
+                                options={{
+                                    responsive: true,
+                                    maintainAspectRatio: false,
+                                    plugins: {
+                                        legend: {
+                                            display: true
+                                        },
+                                        title: {
+                                            display: true,
+                                            ...('title' in lineData ? {text: lineData.title} : {}),
+                                        }
+                                    }
+                                }}
+                                style={{width: "100%", height: "100%"}}
+                            />
+                        )}
                     </div>
                 ) : (
                     <div style={{color: "#888", fontSize: 12}}>No data</div>

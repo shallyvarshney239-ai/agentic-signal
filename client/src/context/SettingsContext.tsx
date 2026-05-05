@@ -1,5 +1,5 @@
 /************************************************************************
- *    Copyright (C) 2025 Code Forge Temple                              *
+ *    Copyright (C) 2025 shally                              *
  *    This file is part of agentic-signal project                       *
  *    See the LICENSE file in the project root for license details.     *
  ************************************************************************/
@@ -8,7 +8,7 @@ import React, {useState, useCallback} from "react";
 import {Settings, SettingsContext} from "./SettingsContextBase";
 
 const defaultSettings: Settings = {
-    ollamaHost: localStorage.getItem("ollamaHost") || "",
+    ollamaHost: localStorage.getItem("ollamaHost") || "http://127.0.0.1:11434",
     browserPath: localStorage.getItem("browserPath") || "",
 };
 

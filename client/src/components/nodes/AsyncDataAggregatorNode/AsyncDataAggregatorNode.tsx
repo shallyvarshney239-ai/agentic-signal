@@ -1,5 +1,5 @@
 /************************************************************************
- *    Copyright (C) 2025 Code Forge Temple                              *
+ *    Copyright (C) 2025 shally                              *
  *    This file is part of agentic-signal project                       *
  *    See the LICENSE file in the project root for license details.     *
  ************************************************************************/
@@ -28,7 +28,7 @@ export function AsyncDataAggregatorNode ({data, id}: NodeProps<AppNode>) {
     const {getEdges} = useReactFlow();
 
     const collectedInputsRef = useRef<Record<string, any>>(input ?? {});
-    const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
+    const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     const lastProcessedRef = useRef<string>("");
     const isAggregatingRef = useRef(false);
 

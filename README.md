@@ -29,18 +29,45 @@ A 3B model is terrible at complex instructions. Our engineering scaffolding make
 
 ---
 
-## Quick Start (3 Commands)
+## Quick Start (One Command)
+
+### Native
 
 ```bash
-git clone https://github.com/code-forge-temple/agentic-signal.git
+git clone https://github.com/crazy-shally/agentic-signal.git
 cd agentic-signal
-./setup.sh        # macOS/Linux - or run setup.ps1 on Windows
-bun run dev       # Start the app
+./setup.sh           # macOS/Linux — or .\setup.ps1 on Windows
+bun run dev          # Start the app at http://localhost:8080
 ```
 
-Setup installs Ollama, pulls phi4-mini, and installs dependencies.
+**`./setup.sh` auto-installs Bun, Ollama, pulls phi4-mini, and installs dependencies — from a completely fresh machine.** No manual steps required.
+
+### Docker
+
+```bash
+git clone https://github.com/crazy-shally/agentic-signal.git
+cd agentic-signal
+docker compose up    # Boots everything at http://localhost:3000
+```
+
+The Docker Compose setup includes:
+- **Ollama** (model auto-pulled on first boot, GPU support)
+- **Backend + Frontend** (Deno + Vite)
+- **Caddy reverse proxy** (single entry port 3000)
 
 ---
+
+## Setup Options
+
+```bash
+./setup.sh --help           # Show all options
+./setup.sh --no-model       # Skip model download
+./setup.sh --model llama3.2:3b   # Use a different model
+./setup.sh --prereq-only    # Install Bun + Ollama only (no deps/model)
+```
+
+---
+
 ## Also Supported
 
 - **llama3.2:3b** (3B params) — pull via `ollama pull llama3.2:3b`
@@ -87,10 +114,11 @@ From data sources to LLM processing to charts - build it visually. No code requi
 
 ## Requirements
 
-- Bun (JavaScript runtime)
-- Ollama (local LLM server)
-- Deno (backend runtime - for development)
+- Bun (JavaScript runtime) — auto-installed by `setup.sh`
+- Ollama (local LLM server) — auto-installed by `setup.sh`
+- Deno (backend runtime) — installed automatically during dev
 - 8GB+ RAM
+- **Or:** Docker + Docker Compose (no local dependencies needed)
 
 ---
 

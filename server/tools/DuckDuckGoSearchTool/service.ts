@@ -1,20 +1,15 @@
-/************************************************************************
- *    Copyright (C) 2025 Code Forge Temple                              *
- *    This file is part of agentic-signal project                       *
- *    See the LICENSE file in the project root for license details.     *
- ************************************************************************/
-
 import {DuckDuckGoResult} from "./types.ts";
-import {chromium, LaunchOptions, Page} from "npm:playwright";
-import {launchBrowser} from "../../utils/browserUtils.ts";
+import {launchBrowser, BrowserLaunchConfig} from "../../utils/browserUtils.ts";
 
 
 export async function fetchDuckDuckGoResults (query: string, browserPath?: string): Promise<DuckDuckGoResult[]> {
     let results: DuckDuckGoResult[] = [];
     const url = `https://duckduckgo.com/?q=${encodeURIComponent(query)}&kl=us-en&kp=-1&ia=web&kd=-1`;
 
+    const config: BrowserLaunchConfig = {executablePath: browserPath};
+
     await launchBrowser(
-        {headless: false, executablePath: browserPath},
+        config,
         async (page) => {
             await page.addInitScript(() => {
                 Object.defineProperty(navigator, 'webdriver', {get: () => undefined});

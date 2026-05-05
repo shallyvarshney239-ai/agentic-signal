@@ -43,4 +43,4 @@ For commercial license purchase: https://pricing.agentic-signal.com
 
 ---
 
-**© 2025-present Code Forge Temple. All rights reserved.**
+**© 2025-present shally. All rights reserved.**

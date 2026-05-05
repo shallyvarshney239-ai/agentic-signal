@@ -2,7 +2,7 @@
     "name": "agentic-signal",
     "version": "2.5.0",
     "description": "Visual AI Workflow Automation Platform with Local Agent Intelligence",
-    "author": "Code Forge Temple",
+    "author": "shally",
     "type": "module",
     "keywords": [
         "ai",
@@ -14,7 +14,7 @@
     ],
     "license": "AGPL-3.0-with-Commercial-Exception",
     "scripts": {
-        "setup": "echo 'Agentic Signal Setup' && echo 'Checking Bun...' && bun --version && echo 'Checking Ollama...' && ollama --version && echo 'Pulling phi4-mini...' && ollama pull phi4-mini && echo 'Installing dependencies...' && bun install && echo 'Setup complete! Run: bun run dev'",
+        "setup": "echo 'Agentic Signal - One-Command Setup' && echo '' && echo 'macOS/Linux:   ./setup.sh' && echo 'Windows:       .\\setup.ps1' && echo 'Docker:        docker compose up' && echo '' && echo 'Options for setup scripts:' && echo '  --no-model      Skip model download' && echo '  --model <name>  Use a specific model' && echo '  --prereq-only   Install Bun + Ollama only' && echo '  --help          Show all options'",
         "prebuild": "bun run scripts/generate-files.ts",
         "client:build": "bun run prebuild && cd client && bun run build",
         "client:preview": "bun run prebuild && cd client && bun run preview",

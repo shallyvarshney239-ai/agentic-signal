@@ -1,5 +1,5 @@
 /************************************************************************
- *    Copyright (C) 2025 Code Forge Temple                              *
+ *    Copyright (C) 2025 shally                              *
  *    This file is part of agentic-signal project                       *
  *    See the LICENSE file in the project root for license details.     *
  ************************************************************************/
@@ -15,13 +15,12 @@ export interface WorkflowTemplate {
     edges: any[];
 }
 
-// Node dimensions for layout calculations
 const NODE_WIDTH = 240;
 const NODE_HEIGHT = 72;
-const H_GAP = 100; // horizontal gap between nodes
-const H_STEP = NODE_WIDTH + H_GAP; // 340px per step
-const V_GAP = 80; // vertical gap between nodes
-const V_STEP = NODE_HEIGHT + V_GAP; // 152px per step
+const H_GAP = 100;
+const H_STEP = NODE_WIDTH + H_GAP;
+const V_GAP = 80;
+const V_STEP = NODE_HEIGHT + V_GAP;
 const START_X = 80;
 const START_Y = 120;
 
@@ -31,17 +30,17 @@ export const templates: WorkflowTemplate[] = [
     {
         id: "stock-price-tracker",
         name: "Stock Price Tracker",
-        description: "Fetch real-time stock prices and visualize them in a chart",
-        nodeCount: 3,
+        description: "Fetch real-time stock quotes from Alpha Vantage and visualize in a chart",
+        nodeCount: 4,
         nodes: [
             {
                 id: "node-1",
                 type: "data-source",
                 position: {x: START_X, y: START_Y},
                 data: {
-                    title: "Stock Symbols",
+                    title: "Stock Symbol",
                     dataSource: {
-                        value: {text: "AAPL,GOOGL,MSFT", files: []},
+                        value: {text: "IBM", files: []},
                         type: "markdown"
                     }
                 },
@@ -49,16 +48,63 @@ export const templates: WorkflowTemplate[] = [
             },
             {
                 id: "node-2",
-                type: "http-data",
+                type: "get-data",
                 position: {x: START_X + H_STEP, y: START_Y},
                 data: {
-                    title: "Stock API",
-                    url: "https://api.example.com/stocks",
-                    method: "GET",
-                    headers: {},
-                    body: "",
-                    userConfig: {},
-                    userConfigSchema: {}
+                    title: "Fetch Stock Quote",
+                    url: "https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=IBM&apikey=demo",
+                    dataType: "json"
+                },
+                measured
+            },
+            {
+                id: "node-3",
+                type: "json-reformatter",
+                position: {x: START_X + H_STEP * 2, y: START_Y},
+                data: {
+                    title: "Extract Price Data",
+                    jsonataExpression: "{\"symbol\": $.\"Global Quote\".\"01. symbol\", \"price\": $number($.\"Global Quote\".\"05. price\"), \"change\": $.\"Global Quote\".\"09. change\", \"change_percent\": $.\"Global Quote\".\"10. change percent\"}"
+                },
+                measured
+            },
+            {
+                id: "node-4",
+                type: "chart",
+                position: {x: START_X + H_STEP * 3, y: START_Y},
+                data: {title: "Stock Price Chart", chartType: "bar"},
+                measured
+            }
+        ],
+        edges: [
+            {id: "edge-1", source: "node-1", target: "node-2", sourceHandle: "right-source", targetHandle: "left-target", type: "smoothstep", animated: false},
+            {id: "edge-2", source: "node-2", target: "node-3", sourceHandle: "right-source", targetHandle: "left-target", type: "smoothstep", animated: false},
+            {id: "edge-3", source: "node-3", target: "node-4", sourceHandle: "right-source", targetHandle: "left-target", type: "smoothstep", animated: false}
+        ]
+    },
+    {
+        id: "currency-exchange-monitor",
+        name: "Currency Exchange Monitor",
+        description: "Fetch live currency exchange rates and display them in a chart",
+        nodeCount: 3,
+        nodes: [
+            {
+                id: "node-1",
+                type: "get-data",
+                position: {x: START_X, y: START_Y},
+                data: {
+                    title: "Exchange Rates API",
+                    url: "https://api.exchangerate-api.com/v4/latest/USD",
+                    dataType: "json"
+                },
+                measured
+            },
+            {
+                id: "node-2",
+                type: "json-reformatter",
+                position: {x: START_X + H_STEP, y: START_Y},
+                data: {
+                    title: "Format Rate Data",
+                    jsonataExpression: "$.rates.($keys($) : {\"currency\": $, \"rate\": $lookup($.rates, $)}).$"
                 },
                 measured
             },
@@ -66,7 +112,7 @@ export const templates: WorkflowTemplate[] = [
                 id: "node-3",
                 type: "chart",
                 position: {x: START_X + H_STEP * 2, y: START_Y},
-                data: {title: "Price Chart", chartType: "line"},
+                data: {title: "Currency Rates", chartType: "bar"},
                 measured
             }
         ],
@@ -101,8 +147,9 @@ export const templates: WorkflowTemplate[] = [
                 data: {
                     title: "Summarize with AI",
                     prompt: "Summarize the following email content in 2-3 sentences:\n\n{input}",
-                    model: "",
-                    maxFeedbackLoops: 0
+                    model: "phi4-mini",
+                    maxFeedbackLoops: 0,
+                    maxToolRetries: 3
                 },
                 measured
             },
@@ -122,60 +169,75 @@ export const templates: WorkflowTemplate[] = [
     {
         id: "weather-alert-bot",
         name: "Weather Alert Bot",
-        description: "Schedule weather checks and send alerts via webhook when conditions are met",
-        nodeCount: 4,
+        description: "Fetch weather from Open-Meteo (free), check conditions, and show alert output",
+        nodeCount: 5,
         nodes: [
             {
                 id: "node-1",
                 type: "timer",
                 position: {x: START_X, y: START_Y},
-                data: {title: "Weather Check Timer", timerTrigger: 3600},
+                data: {
+                    title: "Hourly Check",
+                    mode: "interval",
+                    interval: 3600,
+                    immediate: true,
+                    runOnce: false,
+                    toSanitize: ["input"]
+                },
                 measured
             },
             {
                 id: "node-2",
-                type: "ai-tool",
+                type: "get-data",
                 position: {x: START_X + H_STEP, y: START_Y},
                 data: {
-                    title: "Weather Tool",
-                    toolSubtype: "fetch-weather-data",
-                    userConfig: {requireToolUse: true},
-                    userConfigSchema: {
-                        requireToolUse: {type: "boolean", description: "Require tool use", default: true}
-                    }
+                    title: "Fetch Weather (Berlin)",
+                    url: "https://api.open-meteo.com/v1/forecast?latitude=52.52&longitude=13.41&current_weather=true",
+                    dataType: "json"
                 },
                 measured
             },
             {
                 id: "node-3",
-                type: "data-validation",
+                type: "json-reformatter",
                 position: {x: START_X + H_STEP * 2, y: START_Y},
                 data: {
-                    title: "Condition Check",
-                    validationRules: [{field: "temperature", operator: "gt", value: 30}]
+                    title: "Extract Conditions",
+                    jsonataExpression: "{\"temperature_c\": current_weather.temperature, \"windspeed_kmh\": current_weather.windspeed, \"winddirection\": current_weather.winddirection, \"weather_code\": current_weather.weathercode, \"time\": current_weather.time}"
                 },
                 measured
             },
             {
                 id: "node-4",
-                type: "http-data",
+                type: "data-validation",
                 position: {x: START_X + H_STEP * 3, y: START_Y},
                 data: {
-                    title: "Send Alert",
-                    url: "https://hooks.example.com/alerts",
-                    method: "POST",
-                    headers: {"Content-Type": "application/json"},
-                    body: '{"alert": "High temperature detected"}',
-                    userConfig: {},
-                    userConfigSchema: {}
+                    title: "Condition Check",
+                    schema: `{
+  "type": "object",
+  "properties": {
+    "temperature_c": {"type": "number"},
+    "windspeed_kmh": {"type": "number"},
+    "time": {"type": "string"}
+  },
+  "required": ["temperature_c", "windspeed_kmh"]
+}`
                 },
+                measured
+            },
+            {
+                id: "node-5",
+                type: "data-flow-spy",
+                position: {x: START_X + H_STEP * 4, y: START_Y},
+                data: {title: "Weather Alert Output"},
                 measured
             }
         ],
         edges: [
             {id: "edge-1", source: "node-1", target: "node-2", sourceHandle: "right-source", targetHandle: "left-target", type: "smoothstep", animated: false},
             {id: "edge-2", source: "node-2", target: "node-3", sourceHandle: "right-source", targetHandle: "left-target", type: "smoothstep", animated: false},
-            {id: "edge-3", source: "node-3", target: "node-4", sourceHandle: "right-source", targetHandle: "left-target", type: "smoothstep", animated: false}
+            {id: "edge-3", source: "node-3", target: "node-4", sourceHandle: "right-source", targetHandle: "left-target", type: "smoothstep", animated: false},
+            {id: "edge-4", source: "node-4", target: "node-5", sourceHandle: "right-source", targetHandle: "left-target", type: "smoothstep", animated: false}
         ]
     },
     {
@@ -186,53 +248,63 @@ export const templates: WorkflowTemplate[] = [
         nodes: [
             {
                 id: "node-1",
-                type: "async-data-aggregator",
-                position: {x: START_X, y: START_Y + V_STEP},
-                data: {title: "Data Aggregator"},
+                type: "get-data",
+                position: {x: START_X, y: START_Y},
+                data: {
+                    title: "Currency (USD Base)",
+                    url: "https://api.exchangerate-api.com/v4/latest/USD",
+                    dataType: "json"
+                },
                 measured
             },
             {
                 id: "node-2",
-                type: "http-data",
-                position: {x: START_X + H_STEP, y: START_Y},
-                data: {title: "API Source 1", url: "https://api.example.com/data1", method: "GET", headers: {}, body: "", userConfig: {}, userConfigSchema: {}},
+                type: "get-data",
+                position: {x: START_X, y: START_Y + V_STEP},
+                data: {
+                    title: "Bitcoin Price",
+                    url: "https://api.coindesk.com/v1/bpi/currentprice.json",
+                    dataType: "json"
+                },
                 measured
             },
             {
                 id: "node-3",
-                type: "http-data",
-                position: {x: START_X + H_STEP, y: START_Y + V_STEP},
-                data: {title: "API Source 2", url: "https://api.example.com/data2", method: "GET", headers: {}, body: "", userConfig: {}, userConfigSchema: {}},
+                type: "get-data",
+                position: {x: START_X, y: START_Y + V_STEP * 2},
+                data: {
+                    title: "Weather (Berlin)",
+                    url: "https://api.open-meteo.com/v1/forecast?latitude=52.52&longitude=13.41&current_weather=true",
+                    dataType: "json"
+                },
                 measured
             },
             {
                 id: "node-4",
-                type: "http-data",
-                position: {x: START_X + H_STEP, y: START_Y + V_STEP * 2},
-                data: {title: "API Source 3", url: "https://api.example.com/data3", method: "GET", headers: {}, body: "", userConfig: {}, userConfigSchema: {}},
+                type: "async-data-aggregator",
+                position: {x: START_X + H_STEP, y: START_Y + V_STEP},
+                data: {title: "Data Aggregator"},
                 measured
             },
             {
                 id: "node-5",
                 type: "chart",
                 position: {x: START_X + H_STEP * 2, y: START_Y + V_STEP},
-                data: {title: "Dashboard", chartType: "mixed"},
+                data: {title: "Multi-Source Dashboard", chartType: "mixed"},
                 measured
             }
         ],
         edges: [
-            {id: "edge-1", source: "node-1", target: "node-2", sourceHandle: "right-source", targetHandle: "left-target", type: "smoothstep", animated: false},
-            {id: "edge-2", source: "node-1", target: "node-3", sourceHandle: "right-source", targetHandle: "left-target", type: "smoothstep", animated: false},
-            {id: "edge-3", source: "node-1", target: "node-4", sourceHandle: "right-source", targetHandle: "left-target", type: "smoothstep", animated: false},
-            {id: "edge-4", source: "node-2", target: "node-5", sourceHandle: "right-source", targetHandle: "left-target", type: "smoothstep", animated: false},
-            {id: "edge-5", source: "node-3", target: "node-5", sourceHandle: "right-source", targetHandle: "left-target", type: "smoothstep", animated: false},
-            {id: "edge-6", source: "node-4", target: "node-5", sourceHandle: "right-source", targetHandle: "left-target", type: "smoothstep", animated: false}
+            {id: "edge-1", source: "node-1", target: "node-4", sourceHandle: "right-source", targetHandle: "left-target", type: "smoothstep", animated: false},
+            {id: "edge-2", source: "node-2", target: "node-4", sourceHandle: "right-source", targetHandle: "left-target", type: "smoothstep", animated: false},
+            {id: "edge-3", source: "node-3", target: "node-4", sourceHandle: "right-source", targetHandle: "left-target", type: "smoothstep", animated: false},
+            {id: "edge-4", source: "node-4", target: "node-5", sourceHandle: "right-source", targetHandle: "left-target", type: "smoothstep", animated: false}
         ]
     },
     {
         id: "ai-web-search-assistant",
         name: "AI Web Search Assistant",
-        description: "Search the web, process results with AI, and format into clean JSON",
+        description: "Search DuckDuckGo, process results with AI, and format into clean JSON",
         nodeCount: 4,
         nodes: [
             {
@@ -242,7 +314,7 @@ export const templates: WorkflowTemplate[] = [
                 data: {
                     title: "Search Query",
                     dataSource: {
-                        value: {text: "Enter your search query here...", files: []},
+                        value: {text: "latest AI news 2025", files: []},
                         type: "markdown"
                     }
                 },
@@ -253,10 +325,20 @@ export const templates: WorkflowTemplate[] = [
                 type: "ai-tool",
                 position: {x: START_X + H_STEP, y: START_Y},
                 data: {
-                    title: "Web Search",
-                    toolSubtype: "web-search",
-                    userConfig: {requireToolUse: true},
-                    userConfigSchema: {requireToolUse: {type: "boolean", description: "Require tool use", default: true}}
+                    title: "DuckDuckGo Search",
+                    toolSubtype: "duckduckgo-search",
+                    toolSchema: {
+                        name: "duckDuckGoSearch",
+                        description: "Performs a DuckDuckGo search and returns the top results.",
+                        parameters: {
+                            type: "object",
+                            properties: {
+                                query: {type: "string", description: "Search query"}
+                            },
+                            required: ["query"]
+                        }
+                    },
+                    userConfig: {maxResults: 5, requireToolUse: true}
                 },
                 measured
             },
@@ -266,27 +348,29 @@ export const templates: WorkflowTemplate[] = [
                 position: {x: START_X + H_STEP * 2, y: START_Y},
                 data: {
                     title: "AI Analysis",
-                    prompt: "Analyze the search results and provide key insights:\n\n{input}",
-                    model: "",
-                    maxFeedbackLoops: 0
+                    prompt: "Analyze the following search results and provide a structured summary with key headlines and insights. Return your response as JSON:\n\n{input}",
+                    model: "phi4-mini",
+                    maxFeedbackLoops: 3,
+                    maxToolRetries: 3,
+                    format: {
+                        onSuccess: `{
+  "type": "object",
+  "properties": {
+    "summary": {"type": "string", "description": "Overall summary of findings"},
+    "headlines": {"type": "array", "items": {"type": "object", "properties": {"title": {"type": "string"}, "source": {"type": "string"}, "key_point": {"type": "string"}}}},
+    "sentiment": {"type": "string", "enum": ["positive", "neutral", "negative"]}
+  },
+  "required": ["summary", "headlines"]
+}`
+                    }
                 },
                 measured
             },
             {
                 id: "node-4",
-                type: "json-reformatter",
+                type: "data-flow-spy",
                 position: {x: START_X + H_STEP * 3, y: START_Y},
-                data: {
-                    title: "Format Output",
-                    outputFormat: {
-                        type: "object",
-                        properties: {
-                            query: {type: "string"},
-                            results: {type: "array"},
-                            summary: {type: "string"}
-                        }
-                    }
-                },
+                data: {title: "Final Results"},
                 measured
             }
         ],
@@ -298,42 +382,42 @@ export const templates: WorkflowTemplate[] = [
     },
     {
         id: "simple-scheduled-report",
-        name: "Simple Scheduled Report",
-        description: "Periodically fetch data, generate charts, and send reports via email",
+        name: "Scheduled Data Report",
+        description: "Periodically fetch market data, generate charts, and present the report",
         nodeCount: 5,
         nodes: [
             {
                 id: "node-1",
                 type: "timer",
                 position: {x: START_X, y: START_Y},
-                data: {title: "Daily Schedule", timerTrigger: 86400},
+                data: {
+                    title: "Daily Trigger",
+                    mode: "interval",
+                    interval: 86400,
+                    immediate: true,
+                    runOnce: false,
+                    toSanitize: ["input"]
+                },
                 measured
             },
             {
                 id: "node-2",
-                type: "data-source",
+                type: "get-data",
                 position: {x: START_X + H_STEP, y: START_Y},
                 data: {
-                    title: "Report Data",
-                    dataSource: {
-                        value: {text: "Enter report data or description here...", files: []},
-                        type: "markdown"
-                    }
+                    title: "Crypto Market Data",
+                    url: "https://api.coindesk.com/v1/bpi/currentprice.json",
+                    dataType: "json"
                 },
                 measured
             },
             {
                 id: "node-3",
-                type: "http-data",
+                type: "json-reformatter",
                 position: {x: START_X + H_STEP * 2, y: START_Y},
                 data: {
-                    title: "Fetch Metrics",
-                    url: "https://api.example.com/metrics",
-                    method: "GET",
-                    headers: {},
-                    body: "",
-                    userConfig: {},
-                    userConfigSchema: {}
+                    title: "Extract Prices",
+                    jsonataExpression: "{\"currencies\": bpi.($keys($) : {\"code\": code, \"rate\": $number($replace(rate, ',', ''))}).$, \"updated\": time.updated, \"disclaimer\": disclaimer}"
                 },
                 measured
             },
@@ -341,22 +425,14 @@ export const templates: WorkflowTemplate[] = [
                 id: "node-4",
                 type: "chart",
                 position: {x: START_X + H_STEP * 3, y: START_Y},
-                data: {title: "Report Chart", chartType: "bar"},
+                data: {title: "Bitcoin Price Chart", chartType: "bar"},
                 measured
             },
             {
                 id: "node-5",
-                type: "http-data",
+                type: "data-flow-spy",
                 position: {x: START_X + H_STEP * 4, y: START_Y},
-                data: {
-                    title: "Send Report",
-                    url: "https://api.example.com/send-email",
-                    method: "POST",
-                    headers: {"Content-Type": "application/json"},
-                    body: '{"subject": "Daily Report", "body": "See attached chart"}',
-                    userConfig: {},
-                    userConfigSchema: {}
-                },
+                data: {title: "Daily Report Output"},
                 measured
             }
         ],
@@ -392,7 +468,7 @@ export const templates: WorkflowTemplate[] = [
                 position: {x: START_X + H_STEP, y: START_Y},
                 data: {
                     title: "Llama 3.2 3B (Tier 1)",
-                    model: "",
+                    model: "llama3.2:3b",
                     prompt: "Analyze the provided company data. Extract all financial metrics, key facts, and provide a structured summary. Be factual and concise.",
                     message: {preffix: "Extract structured data from the following company report:\n\n", suffix: "\n\nOutput ONLY valid JSON - no other text."},
                     format: {
@@ -432,7 +508,7 @@ export const templates: WorkflowTemplate[] = [
                 position: {x: START_X + 2 * H_STEP, y: START_Y},
                 data: {
                     title: "Format Output",
-                    expression: "{\"company\": company_name, \"revenue_total_M\": $sum(quarterly_revenue.*), \"customer_count\": total_customers, \"contact\": contact_email, \"insights\": key_insights}",
+                    jsonataExpression: "{\"company\": company_name, \"revenue_total_M\": $sum(quarterly_revenue.*), \"customer_count\": total_customers, \"contact\": contact_email, \"insights\": key_insights}",
                     userConfig: {},
                     userConfigSchema: {}
                 },
@@ -444,7 +520,7 @@ export const templates: WorkflowTemplate[] = [
                 position: {x: START_X + 3 * H_STEP, y: START_Y},
                 data: {
                     title: "Validate Structure",
-                    jsonSchema: `{
+                    schema: `{
   "type": "object",
   "properties": {
     "company": {"type": "string", "minLength": 2},
@@ -453,9 +529,7 @@ export const templates: WorkflowTemplate[] = [
     "insights": {"type": "array", "minItems": 1}
   },
   "required": ["company", "revenue_total_M", "insights"]
-}`,
-                    userConfig: {},
-                    userConfigSchema: {}
+}`
                 },
                 measured
             },
@@ -465,13 +539,7 @@ export const templates: WorkflowTemplate[] = [
                 position: {x: START_X + 4 * H_STEP, y: START_Y},
                 data: {
                     title: "Revenue Chart",
-                    chartType: "bar",
-                    chartConfig: {labelKey: "quarter", dataKey: "value"},
-                    chartData: {
-                        value: [{quarter: "Q1", value: 12.4}, {quarter: "Q2", value: 18.7}, {quarter: "Q3", value: 15.2}]
-                    },
-                    userConfig: {},
-                    userConfigSchema: {}
+                    chartType: "bar"
                 },
                 measured
             }

@@ -1,5 +1,5 @@
 /************************************************************************
- *    Copyright (C) 2025 Code Forge Temple                              *
+ *    Copyright (C) 2025 shally                              *
  *    This file is part of agentic-signal project                       *
  *    See the LICENSE file in the project root for license details.     *
  ************************************************************************/
@@ -651,7 +651,7 @@ function AppFlow () {
             <TemplatesGallery
                 open={templatesModalOpen}
                 onClose={() => setTemplatesModalOpen(false)}
-                onUseTemplate={(template) => {
+                onUseTemplate={(template, merge) => {
                     const hydratedNodes = template.nodes.map((node: any) => {
                         if (!node.type || !node.data) return node;
 
@@ -667,6 +667,7 @@ function AppFlow () {
                                 updatedNode = {
                                     ...node,
                                     data: {
+                                        ...descriptor?.defaultData,
                                         ...node.data,
                                         toolSchema: tool.toolSchema,
                                         userConfigSchema: tool.userConfigSchema,
@@ -683,6 +684,7 @@ function AppFlow () {
                                 updatedNode = {
                                     ...node,
                                     data: {
+                                        ...descriptor?.defaultData,
                                         ...node.data,
                                         toolSchema: {},
                                         title: descriptor?.defaultData.title || node.data.title,
@@ -708,12 +710,31 @@ function AppFlow () {
                         return updatedNode;
                     });
 
-                    const templateWithIds = remapNodeAndEdgeIds(hydratedNodes, template.edges);
+                    const {remappedNodes, remappedEdges} = remapNodeAndEdgeIds(hydratedNodes, template.edges);
 
-                    setNodes(templateWithIds.remappedNodes);
-                    setEdges(templateWithIds.remappedEdges);
+                    if (merge && nodes.length > 0) {
+                        const maxY = Math.max(...nodes.map(n => n.position.y + (n.measured?.height ?? 40)));
+                        const minX = Math.min(...nodes.map(n => n.position.x));
+                        const pendingMinY = Math.min(...remappedNodes.map((n: any) => n.position.y));
+                        const pendingMinX = Math.min(...remappedNodes.map((n: any) => n.position.x));
+                        const yOffset = maxY + 100;
+                        const shiftedNodes = remappedNodes.map((node: any) => ({
+                            ...node,
+                            position: {
+                                x: node.position.x - pendingMinX + minX,
+                                y: node.position.y + yOffset - pendingMinY
+                            }
+                        }));
+
+                        setNodes([...nodes, ...shiftedNodes]);
+                        setEdges([...edges, ...remappedEdges]);
+                        enqueueSnackbar('Template merged successfully', {variant: 'success'});
+                    } else {
+                        setNodes(remappedNodes);
+                        setEdges(remappedEdges);
+                        enqueueSnackbar('Template loaded successfully', {variant: 'success'});
+                    }
                     setTemplatesModalOpen(false);
-                    enqueueSnackbar('Template loaded successfully', {variant: 'success'});
                 }}
                 hasExistingWorkflow={nodes.length > 0}
             />

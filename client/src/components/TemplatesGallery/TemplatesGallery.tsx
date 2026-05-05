@@ -1,5 +1,5 @@
 /************************************************************************
- *    Copyright (C) 2025 Code Forge Temple                              *
+ *    Copyright (C) 2025 shally                              *
  *    This file is part of agentic-signal project                       *
  *    See the LICENSE file in the project root for license details.     *
  ************************************************************************/
@@ -20,27 +20,31 @@ interface TemplatesGalleryProps {
 const nodeColors: Record<string, string> = {
     "data-source": "#4caf50",
     "timer": "#ff9800",
-    "http": "#2196f3",
+    "http-data": "#2196f3",
+    "get-data": "#2563eb",
     "chart": "#9c27b0",
     "llm-process": "#e91e63",
     "data-flow-spy": "#607d8b",
     "data-validation": "#00bcd4",
     "async-data-aggregator": "#8bc34a",
     "ai-tool": "#ff5722",
-    "json-reformatter": "#673ab7"
+    "json-reformatter": "#673ab7",
+    "stock-analysis": "#16a34a"
 };
 
 const nodeIcons: Record<string, string> = {
     "data-source": "DS",
     "timer": "TM",
-    "http": "HT",
+    "http-data": "HT",
+    "get-data": "GD",
     "chart": "CH",
     "llm-process": "AI",
     "data-flow-spy": "SP",
     "data-validation": "VL",
     "async-data-aggregator": "AG",
     "ai-tool": "TL",
-    "json-reformatter": "JS"
+    "json-reformatter": "JS",
+    "stock-analysis": "SA"
 };
 
 export function TemplatesGallery ({

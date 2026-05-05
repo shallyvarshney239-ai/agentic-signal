@@ -1,5 +1,5 @@
 /************************************************************************
- *    Copyright (C) 2025 Code Forge Temple                              *
+ *    Copyright (C) 2025 shally                              *
  *    This file is part of agentic-signal project                       *
  *    See the LICENSE file in the project root for license details.     *
  ************************************************************************/
@@ -155,7 +155,6 @@ class TimerService {
         const instance = this.timers.get(nodeId);
 
         if (instance && 'timer' in instance && instance.timer !== null) {
-            clearInterval(instance.timer);
             clearTimeout(instance.timer);
         }
 

@@ -1,0 +1,9 @@
+:80 {
+    handle /graphql* {
+        reverse_proxy agentic-signal-app:8000
+    }
+
+    handle {
+        reverse_proxy agentic-signal-app:8080
+    }
+}

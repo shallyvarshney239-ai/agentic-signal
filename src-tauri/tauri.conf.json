@@ -38,7 +38,7 @@
     "resources": [
       "bin/"
     ],
-    "publisher": "Code Forge Temple"
+    "publisher": "shally"
   },
   "mainBinaryName": "Agentic Signal"
 }
